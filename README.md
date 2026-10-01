@@ -60,23 +60,39 @@
 ### `search_listings`
 
 - **What it does:**
+Takes the input regarding a clothes description and searches for a matching description, with sizes and prices that can also be optionally added.
 - **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
+description (str)
+size (str)
+max_price (float)
 - **Returns:**
+A list of listing dictionaries, each with the fields: "id,title,description,category,style_tags,size,condition,price,colors,brand,platform"
 - **When it has nothing:**
+It will return an empty list, since nothing matched.
 
 ### `suggest_outfit`
 
 - **What it does:**
+Takes in a thrifted item and the user's wardrobe dict, and suggests outfits.
 - **Inputs:**
+new_item (dict)
+wardrobe (dict)
 - **Returns:**
+A string of outfit suggestions.
 - **When it has nothing:**
+Ask model for general styling advice, and return that advice.
 
 ### `create_fit_card`
 
 - **What it does:**
+Creates a social-media style caption from the outfit suggested and item that matches original description.
 - **Inputs:**
+outfit (str)
+new_item (dict)
 - **Returns:**
+Two-to-four sentence social-media style caption.
 - **When it has nothing:**
+Returns a descriptive message about the outfit.
 
 ---
 
@@ -94,12 +110,22 @@
      function have to be real. -->
 
 **Branch rule:**
+If search_listings returns an empty list, write a message in the session that states what to change in the description and stop. Otherwise, take the first restult and go to suggest_outfit.
 
 **Where it lives:** `agent.py::run_agent`
+It lives in 'agent.py::run_agent'
 
 **How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+The query is parsed by regex in agent::parse_query.
 
 **What moves through the session:** <!-- which fields, in what order -->
+1. parse_query parses description,size, and max_price from user input
+2. _search calls search_listings with the parsed topics and uses that for search_results
+3. If the list is empty in search_listings, it runs the _nothing_found_message function and stops the session.
+4. Otherwise, selected_item is chosen from the first result of the returned list
+5. suggest_outfit then reads selected_item and 'wardrobe', which then fills 'outfit_suggestion'
+6. create_fit_card reads outfit_suggestion(from suggest_outfit) and selected_item, which makes fit_card.
+
 
 ---
 
