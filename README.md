@@ -148,15 +148,30 @@ $ python app.py ask '...'
 ```
 $ python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
 
-```
-
-```
-$ python -c "from tools import suggest_outfit; ..."
+[{'id': 'lst_002', 'title': 'Y2K Baby Tee — Butterfly Print', 'description': 'Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.', 'category': 'tops', 'style_tags': ['y2k', 'vintage', 'graphic tee', 'cottagecore'], 'size': 'S/M', 'condition': 'excellent', 'price': 18.0, 'colors': ['white', 'pink', 'purple'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_006', 'title': 'Graphic Tee — 2003 Tour Bootleg Style', 'description': 'Vintage-style bootleg tee with faded graphic. Slightly boxy fit. 100% cotton, soft and worn-in.', 'category': 'tops', 'style_tags': ['graphic tee', 'vintage', 'grunge', 'streetwear', 'band tee'], 'size': 'L', 'condition': 'good', 'price': 24.0, 'colors': ['black'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_017', 'title': 'Mesh Long-Sleeve Top — Black', 'description': 'Sheer black mesh long-sleeve. Great for layering under a graphic tee or over a bralette. Stretchy material, fits true to size.', 'category': 'tops', 'style_tags': ['y2k', 'grunge', 'goth', 'layering'], 'size': 'S/M', 'condition': 'excellent', 'price': 15.0, 'colors': ['black'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_033', 'title': 'Vintage Band Tee — Faded Grey', 'description': 'Faded grey band-style tee with distressed graphic. Crew neck. Fits boxy. Well-loved but no holes or major damage.', 'category': 'tops', 'style_tags': ['vintage', 'grunge', 'band tee', 'graphic tee', 'streetwear'], 'size': 'L', 'condition': 'fair', 'price': 19.0, 'colors': ['grey', 'charcoal'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_011', 'title': 'Low-Rise Cargo Pants — Khaki', 'description': 'Y2K era low-rise cargo pants. Lots of pockets. Khaki color, slightly distressed at the hems. Great for layering with a long tee.', 'category': 'bottoms', 'style_tags': ['y2k', 'cargo', '2000s', 'streetwear'], 'size': 'W29', 'condition': 'fair', 'price': 27.0, 'colors': ['khaki', 'tan'], 'brand': None, 'platform': 'poshmark'}, {'id': 'lst_015', 'title': 'Vintage Graphic Hoodie — Faded Black', 'description': 'Faded black pullover hoodie with barely-visible vintage graphic on the chest. Cozy interior. Some pilling but adds to the worn-in look.', 'category': 'tops', 'style_tags': ['vintage', 'grunge', 'graphic', 'streetwear'], 'size': 'L', 'condition': 'fair', 'price': 26.0, 'colors': ['black', 'charcoal'], 'brand': None, 'platform': 'depop'}]
 
 ```
 
+
 ```
-$ python -c "from tools import create_fit_card; ..."
+$ python -c "from tools import suggest_outfit; from utils.data_loader import get_example_wardrobe, load_listings; print(suggest_outfit(load_listings()[0], get_example_wardrobe()))"
+
+Yes, buy them. Since your existing jeans are baggy dark wash, these medium-wash 501s will give you a completely different, classic straight-leg silhouette that your closet currently lacks. 
+
+Outfit 1: Pair the 501s with your white ribbed tank top tucked in, layered under the slightly cropped vintage black denim jacket, and finish with your chunky white sneakers and black crossbody bag. Cinch the waist with your brown leather belt to pull the denim-on-denim look together. This is an effortless, go-to outfit for running errands, casual weekend coffee runs, or walking around the city.
+
+Outfit 2: Wear the 501s with your really oversized grey crewneck sweatshirt hanging loose over the top, paired with your black combat boots and the black crossbody bag. The structured, straight fit of the vintage Levi'swill balance out the heavy, oversized proportions of the sweatshirt. This is an easy, comfortable look for casual hangouts, travel days, or working from a coffee shop.
+
+```
+
+```
+$ python -c "from tools import create_fit_card; from utils.data_loader import load_listings; print(create_fit_card('jeans and white sneakers', load_listings()[0]))""
+
+Run 1: Scored these vintage Levi's 501 jeans on depop for $38 and I am obsessed. They are a size W30 L30 with the absolute best worn-in fade at the knees. I'm going to wear them with crisp white sneakers for the easiest everyday streetwear vibe.
+
+Run 2: Scored these vintage Levi's 501 jeans on Depop for just $38 and they fit like an absolute dream. The wash is perfection, and I'm totally planning to live in them with my chunky white sneakers for the ultimate casual streetwear fit. Grabbed them in size W30 L30 and I'm never taking them off.
+
+Run 3: Scored these vintage Levi's 501 jeans on Depop for just $38 and I am obsessed with the knee fading. They are a size W30 L30 and fit me like an absolute dream. I am totally styling them with crisp white sneakers for thateffortless, casual weekend uniform.
 
 ```
 
@@ -174,14 +189,20 @@ $ python -c "from tools import create_fit_card; ..."
 **Moment 1**
 
 - *What I asked for:*
+
 - *What came back:*
+
 - *What I changed:*
+
 
 **Moment 2**
 
 - *What I asked for:*
+
 - *What came back:*
+
 - *What I changed:*
+
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
