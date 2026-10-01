@@ -28,6 +28,7 @@ tool calls and returns a fit card — in at least 4 of 5 tries.
 <!-- Why 4 of 5 and not 5 of 5? Something about your search, probably —
      "my search is a plain keyword match and some phrasings will miss" is a
      real answer. -->
+- A search can be vague or plain, which can mean that some words wont be detected.
 
 ---
 
@@ -39,12 +40,14 @@ Given a query that matches no listings, the agent stops before calling
 **Why this target:**
 <!-- Why is 5 of 5 reasonable here when criterion 1 isn't? What's different
      about this path? -->
+- The later tools, like suggest_outfit and create_fit_card, wont be able to function and do anything meaningful without an item. This makes it necessary to be all 5 of 5 tries.
 
 ---
 
 ## 3. Something about state
 
 <!-- YOU WRITE THIS ONE.
+
 
      How would you know that the item your search found is the same item the
      next tool received? Name something countable or observable.
@@ -54,9 +57,10 @@ Given a query that matches no listings, the agent stops before calling
      compares session["selected_item"] against what actually reached
      suggest_outfit is the shape you're after. -->
 
-
+The selected_item ID reaches both suggest_outfit and create_fit_card unchanged — for 5 of 5 tries
 
 **Why this target:**
+- This ensures that the match that was picked is the one that was described. Using the ID makes sure it stays consistent throughout the whole run for each run. This path is determinstic.
 
 
 
@@ -75,10 +79,10 @@ Given a query that matches no listings, the agent stops before calling
      sentence? A card longer than a caption anyone would post? Any of those can
      be turned into a number. -->
 
-
+For 5 different items, each fit card mentions the item's price,size, and platform, and is between 2-4 sentences — In at least 4 of 5 tries.
 
 **Why this target:**
-
+- Wording can make it so some fit cards may not pass. When checking for a number like '$38', the model can write it in words instead, and even though it is right, it can still fail.
 
 
 ---
@@ -92,10 +96,11 @@ Given a query that matches no listings, the agent stops before calling
      search respects a price ceiling — anything, as long as it names a number
      or an observable outcome. -->
 
+For 5 queries with a price ceiling, every listing in search_results has a price less than or equal to the ceiling  — In 5 of 5 tries.
 
 
 **Why this target:**
-
+- This target ensures correctness. The search respects the price ceiling the user has set it to, so no listing above it ever reaches the later tools (search_outfit & create_fit_card)
 
 
 ---
