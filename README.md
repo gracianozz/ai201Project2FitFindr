@@ -41,7 +41,7 @@
 
 <!-- Three or four sentences: what a user asks for, and what they get back. -->
 
-
+FitFindr takes an input request from the user, something like "vintage graphic tee under $30", and creates style and outfit ideas. It gets the description,size, and price from the input, and then searches for items that can match or satisfy. It obtains details like the title,size,condition, and platform of what is a match. If nothing is matched and returned, the user gets a message explaining that nothing was found, as well as some suggestions on what could help their next search be successful. The end result is a matching listing, an outfit idea based on the listing, and a social-media style caption describing it.
 
 ---
 
@@ -137,9 +137,35 @@ The query is parsed by regex in agent::parse_query.
      2. Your three per-tool terminal tests — the command and what it printed. -->
 
 **One full query**
-
 ```
-$ python app.py ask '...'
+$ python app.py ask 'vintage graphic tee under $30'
+
+[1] parse_query
+      in:  vintage graphic tee under $30
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 items: Y2K Baby Tee — Butterfly Print, Graphic Tee — 2003 Tour Bootleg Style, Vintage Band Tee — Faded Grey … +7 more
+      →    10 match(es)
+[3] select_item
+      out: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+[4] suggest_outfit
+      in:  Y2K Baby Tee — Butterfly Print ($18.0, depop)
+      out: Pair the butterfly baby tee with your dark-wash baggy straight-leg jeans and chunky white sneakers to lean rig…
+      →    10 wardrobe item(s)
+[5] create_fit_card
+      in:  Y2K Baby Tee — Butterfly Print ($18.0, depop)
+      out: Just scored the cutest little butterfly baby tee on Depop and I am obsessed. It’s marked S/M and only $18, whi…
+
+  Found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+
+  Outfit:   Pair the butterfly baby tee with your dark-wash baggy straight-leg jeans and chunky white sneakers tolean right into that Y2K aesthetic. Throw your slightly cropped vintage black denim jacket over top and sling theblack crossbody bag across your chest for an easy, balanced look that plays with proportions. This outfit is perfect for running weekend errands, casual brunch, or meeting up with friends at a café. 
+
+For a slightly warmer or more grounded look, tuck the baby tee into your wide-leg khaki trousers and add the brown leather belt to define your waist. Slip into your black combat boots and layer the black cropped zip hoodie loosely over your shoulders just in case it gets chilly. This combination works great for a casual day on campus, hitting up the local thrift shops, or a casual daytime date. 
+
+Go ahead and buy it—you have plenty of versatile basics in your closet to anchor the loud graphic!
+
+  Fit card: Just scored the cutest little butterfly baby tee on Depop and I am obsessed. It’s marked S/M and only$18, which is an absolute steal for this level of early 2000s nostalgia. I'm totally planning to lean into the Y2K aesthetic by pairing it with baggy straight-leg denim and chunky white sneakers.
 
 ```
 
@@ -189,19 +215,22 @@ Run 3: Scored these vintage Levi's 501 jeans on Depop for just $38 and I am obse
 **Moment 1**
 
 - *What I asked for:*
-
+I asked Claude for ideas on how to build and organize the first tool.
 - *What came back:*
-
+Working and organized code, but with extra functions: _stem, and _score. These functions were extra steps as to better match certain words, like words with a trailing 's', so 'tee' can match with 'tees'
 - *What I changed:*
-
+I suggested that instead of more functions being added, the function can still be implemented inside that function itself. This made it so it matched the TODO list to meet all the requirements.
 
 **Moment 2**
 
 - *What I asked for:*
+I asked claude to check if my 4th criterion was too strict, I originally had it as "For 5 different items, each fit card mentions the item's price,size, and platform, and is between 2-4 sentences — for 5 of 5 tries.
 
 - *What came back:*
+It suggested that I change the tries to at least 4 of 5. Claude explained to me that there may be cases that the model can write item's price,size, and platform differently than comparing it raw to how the listings has it. This made it so even though the criterion technically passes, it fails due to the similarity check.
 
 - *What I changed:*
+I rewrote the criterion to make it so at least 4 of 5 tries to better help with the case of paraphrasing the required topics differently.
 
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
