@@ -2,6 +2,7 @@ import re
 
 import config
 import trace
+from mcp_client import call_tool
 from tools import search_listings, suggest_outfit, create_fit_card
 from generate import ModelUnavailable
 
@@ -143,7 +144,14 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
         steps += 1
         trace.check_iterations(steps)
-        results = _search(parsed)
+        results = call_tool(
+            "search_listings",
+            {
+                "description": parsed["description"],
+                "size": parsed["size"],
+                "max_price": parsed["max_price"],
+            },
+        )
         session["search_results"] = results
         trace.step(
             "search_listings (via MCP)",

@@ -55,11 +55,14 @@ call, and write down in your README exactly where it broke — the error text an
 the last thing that worked. Then carry on to Milestone 2. Everything after this
 works with a direct call, and **a documented failure earns the point in full.**
 ─────────────────────────────────────────────────────────────────────────────
+
 """
 
 from mcp.server.fastmcp import FastMCP
 
 from tools import search_listings as _search_listings_impl  # noqa: F401 — you'll use this below
+
+
 
 # log_level="WARNING" keeps the server from printing an INFO line for every
 # request. Without it your terminal fills with "Processing request of type
@@ -69,20 +72,24 @@ mcp = FastMCP("fitfindr", log_level="WARNING")
 
 # ── TODO: uncomment and fill this in ──────────────────────────────────────────
 #
-# @mcp.tool()
-# def search_listings(
-#     description: str,
-#     size: str | None = None,
-#     max_price: float | None = None,
-# ) -> list[dict]:
-#     """
-#     <-- YOUR DESCRIPTION GOES HERE.
+@mcp.tool()
+def search_listings(
+    description: str,
+    size: str | None = None,
+     max_price: float | None = None,
+     ) -> list[dict]:
+    
+    return _search_listings_impl(description, size, max_price)
+
+"""
+Tool for searching through the listings in data/listings.json with the inputs 'description','size', and 'max_price'(being in dollars and inclusive), and returns list of dicts for the ones that match.
+
 #
 #         One or two sentences. What does this tool do, what does it need, and
 #         what does it give back when it finds nothing? Written for a reader
 #         who cannot see the code.
-#     """
-#     return _search_listings_impl(description, size, max_price)
+ """
+     
 #
 # ──────────────────────────────────────────────────────────────────────────────
 #
