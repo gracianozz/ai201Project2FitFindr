@@ -253,20 +253,231 @@ I rewrote the criterion to make it so at least 4 of 5 tries to better help with 
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. matching query completes | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. impossible query stops early | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. Consistent selected item ID | 5 of 5 | PASS | PASS | PASS | FAIL | FAIL | MISSED (3/5) |
+| 4. Proper fit card description with price, size, and platform | 4 of 5 | PASS | FAIL | FAIL | PASS | FAIL | MISSED (2/5) |
+| 5. Proper price ceiling | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
 **Real output from one try**, pasted as text, naming the file and function
 that produced it:
 
 ```
+CRITERION 1 TRY
+### matching query completes
+
+- Query: `vintage graphic tee under $30`
+- Wardrobe: example
+
+**Try 1**
+
+- stopped early: no
+- selected_item: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+- search_results: 10
+
+Outfit suggestion:
 
 ```
+Outfit 1: Pair the butterfly baby tee with your dark wash baggy straight-leg jeans and the brown leather belt to balance the fitted crop top. Throw on your black cropped zip hoodie over your shoulders and finish the look with chunky white sneakers and your black crossbody bag. This gives you an easy, balanced 90s-meets-Y2K silhouette that is perfect for running weekend errands, hanging out at a coffee shop, or casual daytime dates.
 
+Outfit 2: Tuck the baby tee into your wide-leg khaki trousers and layer your vintage black denim jacket on top to add some edge. Lace up your black combat boots and wear your black crossbody bag for a casual vibe that plays with contrasting proportions. This look is great for casual Fridays, heading to a daytime concert, or meeting friends for lunch.
+```
+
+Fit card:
+
+```
+Just scored this adorable Y2K baby tee with the cutest butterfly graphic on depop and I am obsessed. It is a size S/M and fits like a dream for only $18. I love styling it with baggy jeans and chunky sneakers for the ultimate casual weekend coffee run vibe.
+```
+
+Trace:
+
+```
+[1] parse_query
+      in:  vintage graphic tee under $30
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 items: Y2K Baby Tee — Butterfly Print, Graphic Tee — 2003 Tour Bootleg Style, Vintage Band Tee — Faded Grey … +7 more
+      →    10 match(es)
+[3] select_item
+      out: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+[4] suggest_outfit
+      in:  Y2K Baby Tee — Butterfly Print ($18.0, depop)
+      out: Outfit 1: Pair the butterfly baby tee with your dark wash baggy straight-leg jeans and the brown leather belt …
+      →    10 wardrobe item(s)
+[5] create_fit_card
+      in:  Y2K Baby Tee — Butterfly Print ($18.0, depop)
+      out: Just scored this adorable Y2K baby tee with the cutest butterfly graphic on depop and I am obsessed. It is a s…
+```
+
+
+
+CRITERION 2 TRY
+### impossible query stops early
+
+- Query: `designer ballgown size XXS under $5`
+- Wardrobe: example
+
+**Try 1**
+
+- stopped early: yes — Nothing in the listings matched description 'designer ballgown', size XXS, under $5.
+Things to change: try broader words — 'jacket' finds more than 'cropped corduroy jacket'; drop the size, or try a neighbouring one; raise the price ceiling above $5.
+- selected_item: (none)
+- search_results: 0
+
+Trace:
+
+```
+[1] parse_query
+      in:  designer ballgown size XXS under $5
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: [] (empty)
+      →    0 match(es)
+[3] branch
+      →    search returned []: stopping before suggest_outfit
+```
+
+
+
+CRITERION 3 TRY
+###  Consistent selected item ID
+
+- Query: `leather bomber jacket under $100`
+- Wardrobe: example
+
+**Try 1**
+
+- stopped early: no
+- selected_item: 90s Leather Bomber — Black ($75.0, depop)
+- search_results: 7
+
+Outfit suggestion:
+
+```
+Buy it. This is a 90s staple that will instantly anchor your wardrobe, and the natural creasing gives it an authentic lived-in look that brand-new leather lacks. 
+
+Outfit 1: Layer the oversized grey crewneck sweatshirt over your white ribbed tank top, pair them with your baggy dark-wash straight-leg jeans, and step into the chunky white sneakers. Throw the leather bomber over the grey crewneck, letting the sweatshirt hem peek out the bottom for that effortless, slouchy 90s skater vibe. This outfit is ideal for casual weekend errands, hanging out at a record store, or grabbing coffee.
+
+Outfit 2: Tuck your white ribbed tank top into the wide-leg khaki trousers, cinch your waist with the brown leather belt, and lace up your black combat boots. Top it off with the black leather bomber for a sharp mix of rugged outerwear and tailored, utilitarian bottoms. This look works great for a casual Friday at work, gallery hopping, or a casual dinner date.
+```
+
+Fit card:
+
+```
+Scored this vintage 90s leather bomber on depop for $75 and it has the absolute best worn-in look. It comes in size M and has that perfect boxy skater fit when I layer it over a grey crewneck and baggy jeans. Honestly the easiest way to add some instant grunge to any outfit.
+```
+
+Trace:
+
+```
+[1] parse_query
+      in:  leather bomber jacket under $100
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 7 items: 90s Leather Bomber — Black, 90s Track Jacket — Navy/White Stripe, Denim Jacket — Light Wash, Cropped … +4 more
+      →    7 match(es)
+[3] select_item
+      out: 90s Leather Bomber — Black ($75.0, depop)
+[4] suggest_outfit
+      in:  90s Leather Bomber — Black ($75.0, depop)
+      out: Buy it. This is a 90s staple that will instantly anchor your wardrobe, and the natural creasing gives it an au…
+      →    10 wardrobe item(s)
+[5] create_fit_card
+      in:  90s Leather Bomber — Black ($75.0, depop)
+      out: Scored this vintage 90s leather bomber on depop for $75 and it has the absolute best worn-in look. It comes in…
+```
+
+
+
+
+CRITERION 4
+### Proper fit card description with price,size, and platform
+
+- Query: `low-rise cargo pants`
+- Wardrobe: example
+
+**Try 1**
+
+- stopped early: no
+- selected_item: Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
+- search_results: 3
+
+Outfit suggestion:
+
+```
+Outfit 1: Pair the khaki cargo pants with your white ribbed tank top and the black cropped zip hoodie layered over it, keeping the hoodie unzipped to show off the low-rise waist. Add the chunky white sneakers and the black crossbody bag to complete an authentic early-2000s streetwear look that works great for casual weekend errands or meeting friends for coffee.
+
+Outfit 2: Lean into the oversized Y2K skater silhouette by wearing the cargos with your oversized grey crewneck sweatshirt dropping low over the waistband, and lace up your black combat boots over the distressed hems. Throw on the vintage black denim jacket and sling the black crossbody bag across your chest for an edgy, comfortable outfit tailored for going to a casual outdoor concert or a casual Friday hangout.
+```
+
+Fit card:
+
+```
+Scored these ultimate Y2K cargos over on Poshmark for just $27 and I am so obsessed with the early-2000s streetwear vibe. They are a size W29 with the coolest distressed hems and way too many pockets. I love throwing them on with a cropped zip hoodie and chunky sneakers for the easiest weekend coffee run outfit.
+```
+
+Trace:
+
+```
+[1] parse_query
+      in:  low-rise cargo pants
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 3 items: Low-Rise Cargo Pants — Khaki, Corduroy Wide-Leg Pants — Rust, Low-Top Canvas Sneakers — Off-White
+      →    3 match(es)
+[3] select_item
+      out: Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
+[4] suggest_outfit
+      in:  Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
+      out: Outfit 1: Pair the khaki cargo pants with your white ribbed tank top and the black cropped zip hoodie layered …
+      →    10 wardrobe item(s)
+[5] create_fit_card
+      in:  Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
+      out: Scored these ultimate Y2K cargos over on Poshmark for just $27 and I am so obsessed with the early-2000s stree…
+```
+
+
+
+CRITERION 5 TRY
+### Proper price ceiling
+
+- Query: `Sneakers under $25`
+- Wardrobe: example
+
+**Try 1**
+
+- stopped early: yes — The model couldn't be reached, so the outfit and caption steps didn't run. The search worked — 1 listing(s) were found. Check GEMINI_API_KEY in your .env, then run the same query again.
+What the service said: Couldn't reach the model: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+- selected_item: Low-Top Canvas Sneakers — Off-White ($20.0, poshmark)
+- search_results: 1
+
+Trace:
+
+```
+[1] parse_query
+      in:  Sneakers under $25
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 1 items: Low-Top Canvas Sneakers — Off-White
+      →    1 match(es)
+[3] select_item
+      out: Low-Top Canvas Sneakers — Off-White ($20.0, poshmark)
+[4] model unavailable
+      →    stopping, search results kept
+```
 ---
+
+
+
+
+
+
+
 
 ## Verdicts and Diagnoses
 
