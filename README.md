@@ -315,13 +315,53 @@ that produced it:
 **Happy path**
 
 ```
+python app.py ask 'Vintage crewneck for under $25' --trace
+[1] parse_query
+      in:  Vintage crewneck for under $25
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 items: Oversized Crewneck Sweatshirt — Vintage Navy, Oversized College Crewneck — Faded Red, Y2K Baby Tee — Butterfly Print … +7 more
+      →    10 match(es)
+[3] select_item
+      out: Oversized Crewneck Sweatshirt — Vintage Navy ($20.0, thredUp)
+[4] suggest_outfit
+      in:  Oversized Crewneck Sweatshirt — Vintage Navy ($20.0, thredUp)
+      out: Buy it. A genuine vintage navy crewneck is a foundational piece that adds great texture, and since your other …
+      →    10 wardrobe item(s)
+[5] create_fit_card
+      in:  Oversized Crewneck Sweatshirt — Vintage Navy ($20.0, thredUp)
+      out: Scored this vintage navy crewneck on thredUp for just $20 and it's already my new favorite basic. It came in s…
 
+  Found:    Oversized Crewneck Sweatshirt — Vintage Navy — $20.0 on thredUp
+
+  Outfit:   Buy it. A genuine vintage navy crewneck is a foundational piece that adds great texture, and since your other grey sweatshirt is extra long, this will give you a different silhouette. 
+
+Outfit 1:
+Pair the navy sweatshirt with your wide-leg khaki trousers, cinched with the brown leather belt, and finish with chunky white sneakers. Layer the white ribbed tank underneath so just the hem and collar peek out for subtle contrast. This is effortless and put-together, perfect for casual coffee runs, running errands, or a relaxed day of working from a cafe.
+
+Outfit 2:
+Tuck the front of the navy sweatshirt loosely into your dark wash baggy straight-leg jeans, add the black crossbody bag, and lace up your black combat boots. Throw your vintage black denim jacket on top for extra warmth and texture. It is a sharp, vintage-leaning casual look that works well for weekend hangouts, casual dinners, or going to a concert.
+
+  Fit card: Scored this vintage navy crewneck on thredUp for just $20 and it's already my new favorite basic. It came in size XL (fits oversized) and has that real, perfectly faded look you can't fake. I'm planning to layer it over a white tank with khaki trousers for coffee runs, or pair it with baggy jeans and combat boots for weekend concerts.
 ```
 
 **Empty search**
 
 ```
+python app.py ask '...' --trace
+[1] parse_query
+      in:  ...
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: [] (empty)
+      →    0 match(es)
+[3] branch
+      →    search returned []: stopping before suggest_outfit
 
+  Nothing in the listings matched description '...'.
+Things to change: try broader words — 'jacket' finds more than 'cropped corduroy jacket'.
 ```
 
 **On the MCP move:** <!-- what changed in your code, and whether anything
