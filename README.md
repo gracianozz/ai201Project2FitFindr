@@ -232,6 +232,12 @@ It suggested that I change the tries to at least 4 of 5. Claude explained to me 
 - *What I changed:*
 I rewrote the criterion to make it so at least 4 of 5 tries to better help with the case of paraphrasing the required topics differently.
 
+**UNIT 4**
+- In this unit, I used AI to help me summarize the results of each run that I made from each scenario. Claude helped me understand and better format what each pass in each run meant, as well as misses. This helped me fill in the before and after table to better show the results of any changes.
+
+- Another way I used AI was to better help me understand what could help with the misses and diagnoses I made from the before results. I asked Claude what could be the reason for the criteria 3 and 4 to be missed, and it further explained that the 503 UNAVAILABLE message made it so nothing was returned in certain steps for both criteria, which is what further explained why it was a MISS.
+
+
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
@@ -585,6 +591,8 @@ behaved differently afterwards. If the rewire didn't work, say exactly where it
 broke — the error text and the last thing that worked. That earns the point in
 full. -->
 
+I registered `search_listings` in `mcp_server.py` with `@mcp.tool()`, typed as `description: str`, `size: str | None`, `max_price: float | None`, and it hands off to the real implementation in `tools.py`. In `agent.py::run_agent` the direct call `search_listings(...)` became `call_tool("search_listings", {...})` from `mcp_client.py`, and the trace step is labelled `search_listings (via MCP)` so the seam is visible. `python mcp_client.py` lists the tool with the right types. Nothing behaved differently afterwards: the same queries returned the same lists of dicts, the first result was the same item every time, and the branch rule still fires on an empty list. The one gap is that the server reports no description for the tool, because my docstring sits after the function body instead of inside it, so FastMCP never sees it. That is in What's Still Broken.
+
 
 
 ---
@@ -619,6 +627,8 @@ Meant to handle the 503 UNAVAILABLE that was returned on criteria 3 and 4. The m
 The change did help. Criterion 3 went from 3/5 to 5/5, and criterion 4 went from 2/5 to 5/5 with the same scenarios. I also did a second after run to see if it scored the same.
 
 
+After the improvement, I decided to rerun 8 new scenarios covering the criteria I added. The results are found in results (results/run_2026-10-08_1309_diagnostic.md). The 503 UNAVAILABLE error came back in two tries of the leather bomber scenario. The outage lasted longer than 5 attempts, which made the model return the 503. The generate.py raised a RunTimeError instead of a ModelUnavailable, so the run crashed rather than returning the "model couldnt be reached" message.
+
 
 ---
 
@@ -628,7 +638,7 @@ The change did help. Criterion 3 went from 3/5 to 5/5, and criterion 4 went from
      you did. "I ran out of time" is fine if it's true. Pretending nothing is
      left is not. -->
 
-
+Short outages were handled better, but longer outages got worse. An outage that takes more than 5 attempts now crashes the agent instead of returning an error message. A fix would be to raise the ModelUnavailable so the existing handler catches it. I stopped because this is a second change in which I would need to do its own before and after, but due to time constraints I could not.
 
 <!-- ═════════════════════════════════════════════════════════════════════
 

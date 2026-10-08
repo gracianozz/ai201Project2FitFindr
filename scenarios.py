@@ -28,33 +28,86 @@ SCENARIOS = [
         "wardrobe": "example",
         "criterion": 2,
     },
+
+    # ── Scenarios 3–6 from the Before/After runs. Commented out for the
+    # diagnostic run so they aren't measured a third time — uncomment when done.
+    # {
+    #     # A user with nothing saved. One of unit 4's three failure modes.
+    #     "name": "empty wardrobe",
+    #     "query": "denim jacket under $50",
+    #     "wardrobe": "empty",
+    #     "criterion": None,
+    # },
+    # # Criterion 3 Scenario
+    # {
+    #     "name": "Consistent selected item ID",
+    #     "query": "leather bomber jacket under $100",
+    #     "wardrobe": "example",
+    #     "criterion": 3,
+    # },
+    # # Criterion 4 Scenario
+    # {
+    #     "name": "Proper fit card description with price,size, and platform",
+    #     "query": "low-rise cargo pants",
+    #     "wardrobe": "example",
+    #     "criterion": 4,
+    # },
+    # # Criterion 5 Scenario
+    # {
+    #     "name": "Proper price ceiling",
+    #     "query": "Sneakers under $25",
+    #     "wardrobe": "example",
+    #     "criterion": 5,
+    # },
+
+    # Extra scenarios to press the system and try to break it.
     {
-        # A user with nothing saved. One of unit 4's three failure modes.
-        "name": "empty wardrobe",
-        "query": "denim jacket under $50",
-        "wardrobe": "empty",
-        "criterion": None,
-    },
-    #Criterion 3 Scenario
-    {
-        "name": " Consistent selected item ID",
-        "query": "leather bomber jacket under $100",
-        "wardrobe": "example",
-        "criterion": 3,
-    },
-    #Criterion 4 Scenario
-    {
-        "name": "Proper fit card description with price,size, and platform",
-        "query": "low-rise cargo pants",
+        "name": "fit card: leather bomber (M, $75, depop)",
+        "query": "leather bomber jacket",
         "wardrobe": "example",
         "criterion": 4,
     },
-    #Criterion 5 Scenario
     {
-        "name": "Proper price ceiling",
-        "query": "Sneakers under $25",
+        "name": "fit card: chelsea boots (US 8.5, $44, poshmark)",
+        "query": "suede chelsea boots",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "fit card: bucket hat (One Size, $14, thredUp)",
+        "query": "bucket hat",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "fit card: knit cardigan (One Size / Oversized, $35, depop)",
+        "query": "knit cardigan",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "price ceiling: denim jacket under $50 (7 results, max $45)",
+        "query": "denim jacket under $50",
         "wardrobe": "example",
         "criterion": 5,
+    },
+    {
+        "name": "price ceiling: vintage tee under $0 (0 results, max $0)",
+        "query": "vintage tee under $0",
+        "wardrobe": "example",
+        "criterion": 5,
+    },
+    {
+        "name": "parser: trailing size shortcut",
+        "query": "graphic tee, L",
+        "wardrobe": "example",
+        "criterion": None,
+    },
+    {
+        "name": "parser: ceiling with no dollar sign (expected to be ignored)",
+        "query": "tee under 30",
+        "wardrobe": "example",
+        "criterion": None,
     },
 
     # TODO: add what your criteria 3, 4 and 5 need.
