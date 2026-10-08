@@ -323,16 +323,22 @@ def generate(
         except Exception as exc:  # noqa: BLE001 — surfaced below
             last_error = exc
             message = str(exc).lower()
-            rate_limited = (
+            # Transient: the service is asking us to wait, not refusing us.
+            # 429 is the per-minute rate limit. 503 UNAVAILABLE is "high
+            # demand, try again later" - it showed up in the unit 4 before-run
+            # and ended five tries that a retry would have saved.
+            transient = (
                 "429" in message
+                or "503" in message
+                or "unavailable" in message
                 or "resource" in message and "exhaust" in message
                 or "rate" in message and "limit" in message
             )
-            if not rate_limited:
+            if not transient:
                 raise ModelUnavailable(_explain(exc)) from exc
             backoff = _retry_delay(exc, attempt)
             print(
-                f"  [rate limit] service pushed back. Waiting {backoff:.0f}s "
+                f"  [retry] service pushed back. Waiting {backoff:.0f}s "
                 f"(attempt {attempt + 1} of {config.MAX_RETRIES}). This is "
                 f"the limiter doing its job, not a bug.",
                 file=sys.stderr,
@@ -341,6 +347,6 @@ def generate(
             time.sleep(backoff)
 
     raise RuntimeError(
-        f"Still rate limited after {config.MAX_RETRIES} attempts. Wait a "
+        f"Still unavailable after {config.MAX_RETRIES} attempts. Wait a "
         f"minute and try again — your key is fine.\nLast error: {last_error}"
     )

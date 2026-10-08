@@ -517,6 +517,7 @@ Both of these Criteria missed because of ONE reason, which was the Model's Outpu
 
 ## Loop Trace
 
+
 <!-- One full run, printed step by step, with the MCP call visible in it.
 
      `python app.py ask '...' --trace` once you've added the trace.step()
@@ -596,23 +597,26 @@ full. -->
      `python run_eval.py --label after` -->
 
 **What I changed:**
+Added 503 to the list of errors that generate.py is willing to retry.
 
 **Which failure it was meant to fix:**
+Meant to handle the 503 UNAVAILABLE that was returned on criteria 3 and 4. The model returned 503 UNAVAILABLE and generate.py gave up on the first try, rather than trying again. This change makes it retry the failed model call if there is an outage or a 'high demand' message.
 
 ### Run Log — After
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1.  | matching query completes | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
+| 2.  | impossible query stops early | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
+| 3.  | Consistent selected item ID | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
+| 4.  | Proper fit card description with price, size, and platform | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
+| 5.  | Proper price ceiling | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
 
 **Did it help, and how do I know:**
 
 <!-- If it made things worse, say that. Honestly reported, that earns full
      credit and is more interesting than one that worked. -->
+The change did help. Criterion 3 went from 3/5 to 5/5, and criterion 4 went from 2/5 to 5/5 with the same scenarios. I also did a second after run to see if it scored the same.
 
 
 
@@ -645,7 +649,7 @@ full. -->
 
        [ ] mcp_server.py exists with one tool registered
            (or a written record of exactly where the rewire broke)
-       [ ] Run Log — Before, five criteria, five tries each
+       [ ] hRun Log — Before, five criteria, five tries eac
        [ ] Real output pasted underneath, naming file and function
        [ ] A verdict on every criterion
        [ ] A diagnosis for every miss, naming a place AND a mechanism
