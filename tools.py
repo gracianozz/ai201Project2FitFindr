@@ -144,6 +144,32 @@ def search_listings(
     return [listing for _, listing in scored[: config.SEARCH_RESULT_LIMIT]]
 
 
+# ── Tool 4: compare_listings ────────────────────────────────────────────────────
+
+def compare_listings(listings: list[dict]) -> dict | None:
+    """
+    Compare search results and return the highest-scoring listing.
+    Args:
+        listings: Listing dictionaries returned by search_listings().
+
+    Returns:
+        The highest-scoring listing dictionary, or None if listings is empty.
+
+    Scoring:
+        - Category relevance: 1 point.
+        - Size compatibility: 1 point.
+        - Condition: excellent = 3 points, good = 2 points, fair = 1 point.
+        - Price: 1 point for every listing tied for the lowest price.
+    """
+
+
+
+
+
+
+
+
+
 # ── Tool 2: suggest_outfit ────────────────────────────────────────────────────
 
 def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
