@@ -118,9 +118,9 @@ search_listings()
 ```
 
 `search_listings()` filters and returns matching listing dictionaries.
-`compare_listings()` scores those returned dictionaries using condition and
-relative price, then returns the selected listing. It does not search the data
-again.
+`compare_listings()` scores those returned dictionaries using relevance,
+condition, and relative price, then returns the selected listing. It does not
+search the data again.
 
 ---
 

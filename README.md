@@ -157,7 +157,7 @@ The query is parsed by regex in agent::parse_query.
 6. create_fit_card reads outfit_suggestion(from suggest_outfit) and selected_item, which makes fit_card.
 
 
----
+--- 
 
 ## Sample Run
 
@@ -278,14 +278,16 @@ Claude told me that size was already filtered out in search_listings(), which me
 - *What I changed:*
 That made me choose only the two categories to calculate since size was already being implemented.
 
-**Moment 1**
+**Moment 2**
 
 - *What I asked for:*
+I asked Claude to help calculate the token usage for 10 runs to find the average token usage.
 
 - *What came back:*
+Claude helped me with knowing what token usages to add, which was the prompt tokens +output tokens. Adding both of these made it the total tokens per run.
 
 - *What I changed:*
-
+This helped me understand how many tokens each run on average was using, and described it in my README.
 
 <!-- ═══════════════════════  THE TEST - CAPSTONE ═══════════════════════
 
@@ -398,6 +400,9 @@ The change did help, Criterion 4 went from MISS with no runs passed, to all pass
      you did. "I ran out of time" is fine if it's true. Pretending nothing is
      left is not. -->
 
+All 5 criteria now pass and none fail. However, some of the criteria that I made might have been set too low or 'too easy' to miss. An idea on what to do to tighten a criteria would be to add more runs, to better diversify the outcome of what the system could return. Running each scenario more times would provide more opportunities to reveal inconsistent behavior and would make the results more reliable.
+
+Another thing I would add is to include more information in the logs, such as the scoring details. Adding the scoring details will help in backing up which listing was chosen and why.
 <!-- ═════════════════════════════════════════════════════════════════════
 
      SUBMISSION CHECKLIST — unit 3
