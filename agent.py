@@ -3,7 +3,7 @@ import re
 import config
 import trace
 from mcp_client import call_tool
-from tools import search_listings, suggest_outfit, create_fit_card
+from tools import search_listings, compare_listings, suggest_outfit, create_fit_card
 from generate import ModelUnavailable
 
 
@@ -126,8 +126,9 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
         If search_listings returns an empty list, put a message in
         session["error"] naming what the user could change, and return the
-        session without calling suggest_outfit. Otherwise take the first
-        result, put it in session["selected_item"], and continue.
+        session without calling suggest_outfit. Otherwise, the listings
+        are compared and calculated on price and condition in compare_listings()
+        ,and the best one is put in session["selected_item"], and continue.
     """
     session = new_session(query, wardrobe)
     steps = 0
@@ -171,8 +172,8 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
         steps += 1
         trace.check_iterations(steps)
-        session["selected_item"] = results[0]
-        trace.step("select_item", returned=session["selected_item"])
+        session["selected_item"] = compare_listings(results)
+        trace.step("compare_listings", inputs = results, returned = session["selected_item"])
 
         steps += 1
         trace.check_iterations(steps)

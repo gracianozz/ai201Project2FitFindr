@@ -46,7 +46,7 @@ FitFindr takes an input request from the user, something like "vintage graphic t
 ---
 
 ## The Shape
-The Shape I am picking to extend this system is Shape C. I will be adding a fourth tool to the system, called compare_listings(). This tool will receive the list of dicitonaries that are returned by search_listings(), score each listing using the factors price, condition, and size, and return the listing wiht the highest score. This improves the selection process because the system will no longer automatically choose the first result, it will now choose what is considered the 'best' option for the user.
+The Shape I am picking to extend this system is Shape C. I will be adding a fourth tool to the system, called compare_listings(). This tool will receive the list of dicitonaries that are returned by search_listings(), score each listing using the factors price and condition, and return the listing wiht the highest score. This improves the selection process because the system will no longer automatically choose the first result, it will now choose what is considered the 'best' option for the user.
 
 ## Out of Scope
 I will not be touching or editing how the search_listings(),suggest_outfit(), or create_fit_card(). I also thought about a compare_prices() function before, but decided among the compare_listings, because using more factors rather than just price is more realistic when a person is out shopping.

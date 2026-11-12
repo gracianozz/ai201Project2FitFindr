@@ -156,18 +156,17 @@ def compare_listings(listings: list[dict]) -> dict | None:
         The highest-scoring listing dictionary, or None if listings is empty.
 
     Scoring:
-        - Size compatibility: 1 point.
         - Condition: excellent = 3 points, good = 2 points, fair = 1 point.
         - Price: 1 point for every listing tied for the lowest price.
     """
-    lowest_price = min(listing["price"] for listing in listings)
     best_listing = None
     best_score = -1
 
-    lowest_price = min(listing["price"] for listing in listings)
-
     if not listings:
         return None
+
+    lowest_price = min(listing["price"] for listing in listings)
+
     # The three types of conditions, with their points.
     condition_scores = {
         "excellent": 3,
@@ -178,18 +177,17 @@ def compare_listings(listings: list[dict]) -> dict | None:
     for listing in listings:
         score =0
 
-        #calculate the price
+        #Award a point to listingss tied for the lowest price
         if listing["price"] == lowest_price:
             score += 1
 
         #calculate the condition
         score += condition_scores.get(listing["condition"], 0)
 
+        #Keep the best listing based on the score
         if score > best_score:
             best_score = score
             best_listing = listing
-
-
 
 
     return best_listing
