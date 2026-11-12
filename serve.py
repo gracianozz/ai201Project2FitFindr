@@ -27,15 +27,19 @@ web server has to be. The reason is worth reading before you deploy: see the
 note above `_one_at_a_time` below — it also decides which gunicorn worker you
 can use.
 
-⚠️ There is deliberately NO logging, NO timing and NO request counting in this
-file. That is unit 9's follow-along: you instrument this yourself, first, and
-then deploy it. A structured log you were handed teaches you nothing about
-what belongs in one — and the timing field is the one everybody skips.
+The server logs each request to `logs/runs.jsonl`, including timing and model
+token usage. Token usage is measured per request from the counters maintained
+by `generate.py`; dollar cost is not calculated here.
 """
 
 import os
 import sys
 import threading
+
+import time
+
+import json
+from datetime import datetime, timezone
 
 # config first, and before anything that talks to the model: it loads your .env
 # and fixes the Windows console encoding for every module that imports it.
@@ -44,10 +48,18 @@ import config  # noqa: F401
 from flask import Flask, jsonify, request
 
 from agent import run_agent
+from generate import token_counts
 from utils.data_loader import get_example_wardrobe
 
 app = Flask(__name__)
-
+LOG_FILE = config.ROOT / "logs" / "runs.jsonl"
+def log_run(**fields):
+    entry = {"timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"), **fields}
+    line = json.dumps(entry, ensure_ascii=False)
+    LOG_FILE.parent.mkdir(exist_ok=True)
+    with LOG_FILE.open("a", encoding="utf-8") as f:
+        f.write(line + "\n")
+    print(line, flush=True)
 
 # ── one request at a time ─────────────────────────────────────────────────────
 # Here's why this exists.
@@ -111,6 +123,13 @@ def ask():
     query = (payload.get("query") or "").strip()
     if not query:
         # 400 rather than a stack trace: the caller can act on this one.
+        log_run(
+            status="rejected",
+            error="No query in the request body",
+            prompt_tokens=0,
+            output_tokens=0,
+            total_tokens=0,
+        )
         return jsonify({"error": "Send JSON with a 'query' field, e.g. "
                                  '{"query": "vintage graphic tee under $30"}'}), 400
 
@@ -139,16 +158,35 @@ def ask():
     failure = None
     session = None
     with _one_at_a_time:
+        started = time.perf_counter()
+        tokens_before = token_counts()
         try:
             session = run_agent(query, wardrobe)
         except Exception as exc:  # noqa: BLE001 — a 500 with a sentence beats a hang
             failure = f"{type(exc).__name__}: {exc}"
-
+        tokens_after = token_counts()
+        seconds = round(time.perf_counter() - started, 2)
+    token_usage = {
+        f"{key}_tokens": tokens_after[key] - tokens_before[key]
+        for key in ("prompt", "output", "total")
+    }
     # Outside the lock: building a response is not work the next caller should
     # be waiting on.
     if failure is not None:
+        log_run(
+            status="crashed",
+            query=query,
+            error=failure,
+            seconds=seconds,
+            **token_usage,
+        )
         return jsonify({"error": failure}), 500
-
+    log_run(
+        query=query,
+        output=session["fit_card"] or session["error"],
+        seconds=seconds,
+        **token_usage,
+    )
     return jsonify(session)
 
 

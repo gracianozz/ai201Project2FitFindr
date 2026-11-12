@@ -55,6 +55,33 @@ creates a fit-card caption.
 
 ---
 
+
+### Running the HTTP Server
+
+User two terminals.
+
+**In terminal 1, start the server**
+
+```bash
+
+python serve.py
+```
+Ensure terminal 1 is running while requests are being sent from terminal 2
+
+**In terminal 2, send a request**
+
+```bash
+curl -X POST http://127.0.0.1:5000/ask \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"vintage graphic tee under $30"}'
+```
+
+**Then, check the request log to ensure the log was successful**
+```
+tail -n 1 logs/runs.jsonl
+```
+A successful log should include the query, output, seconds, prompt tokens, output tokens, and total tokens.
+
 ## Every command
 
 | Command | What it does |
