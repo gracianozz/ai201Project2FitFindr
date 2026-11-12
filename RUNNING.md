@@ -4,14 +4,6 @@ Everything about how the starter works and how to use it.
 
 ---
 
-## Before your first class
-
-Setup happens **before class**. The [environment setup page](../pages/ide_setup)
-has the per-operating-system commands and the exact versions.
-
-**Same API key you set up in unit 1.** Nothing new to sign up for. There is one
-new package — the MCP SDK, for unit 4 — and it installs with everything else.
-
 From inside this repo after you've forked and cloned it:
 
 **macOS / Linux**
@@ -44,11 +36,6 @@ If it doesn't and you've made one honest attempt at the error, post the
 
 ---
 
-## Your first five minutes
-
-Start with the data. Your tools will only be as good as your understanding of
-what they're reading, and ten minutes here saves an hour of confused debugging.
-
 ```bash
 python app.py fields                    # what a listing and a wardrobe item hold
 python app.py listings --full -n 6      # read six listings all the way through
@@ -62,9 +49,9 @@ python app.py ask 'vintage graphic tee under $30'
 > and substitutes nothing. You get results with no price ceiling and no error
 > saying so. Single quotes are literal in PowerShell, bash and zsh alike.
 
-That last one runs the loop. All three tools are stubs, so it will tell you the
-loop isn't built yet. **That's the correct starting position** — it runs, and it
-does nothing.
+That last one runs the loop. A successful run searches the listings, compares
+the matches, suggests an outfit using the selected item and wardrobe, and
+creates a fit-card caption.
 
 ---
 
@@ -78,6 +65,8 @@ does nothing.
 | `python app.py examples` | Queries worth trying, including one that matches nothing |
 | `python app.py ask '...'` | Run the agent on one query — **single quotes** |
 | `python app.py ask` | Keep asking until you press Enter on an empty line |
+| `python app.py ask --trace '...'` | Show parsing, search, comparison, and model steps |
+| `python app.py ask --empty-wardrobe '...'` | Run with no saved wardrobe items |
 | `python agent.py` | Runs both example paths — one that matches, one that can't |
 | `python mcp_server.py` | Starts your MCP server — **unit 4** |
 | `python mcp_client.py` | Asks the server what it offers — **unit 4** |
@@ -92,30 +81,19 @@ Useful flags on `ask`:
 | `--empty-wardrobe` | Run as a user with nothing saved — one of unit 4's failure modes |
 
 ---
+The completed selection flow is:
 
-## Which command goes with which milestone
+```text
+search_listings()
+→ compare_listings(results)
+→ suggest_outfit(selected_item, wardrobe)
+→ create_fit_card(outfit, selected_item)
+```
 
-### Unit 3 — the build
-
-| Milestone | What you're doing | Where |
-|---|---|---|
-| 1 | Read the data, run the starter | `app.py fields`, `app.py listings --full`, `app.py ask` |
-| 2 | Spec your three tools | README, **Tool Inventory** |
-| 3 | Write your acceptance criteria | `criteria.md` |
-| 4 | Build the three tools | `tools.py`, tested one at a time from a terminal |
-| 5 | Wire the loop and the state | `agent.py::run_agent` |
-| 6 | Write it up | README |
-
-### Unit 4 — the test
-
-| Milestone | What you're doing | Where |
-|---|---|---|
-| 1 | Move one tool onto MCP | `mcp_server.py`, then `mcp_client.call_tool` in `run_agent` |
-| 2 | Break it on purpose, then trace it | `trace.py`, `app.py ask --trace` |
-| 3 | Run your test | `scenarios.py`, then `run_eval.py --label before` |
-| 4 | Call each criterion, diagnose the misses | README |
-| 5 | Fix one thing and re-run | `run_eval.py --label after` |
-| 6 | Say what's still broken | README |
+`search_listings()` filters and returns matching listing dictionaries.
+`compare_listings()` scores those returned dictionaries using condition and
+relative price, then returns the selected listing. It does not search the data
+again.
 
 ---
 
@@ -160,20 +138,20 @@ the point of the session.
 | File | What it does |
 |---|---|
 | `config.py` | Every setting worth changing — **TEMPERATURE and the cache are at the top** |
-| `tools.py` | Your three tools. **Stubs — you build these** |
+| `tools.py` | Where the 4 tools live |
 | `agent.py` | The planning loop and the session. **Stub — you build this** |
 | `generate.py` | The only thing that calls out to a service. Handles pacing and quota |
 | `trace.py` | The trace helper, and the loop's stop condition |
 | `app.py` | The command line |
 | `serve.py` | The same agent over HTTP, for deploying — **unit 9** |
-| `mcp_server.py` | Your MCP server — **unit 4, you register the tool** |
+| `mcp_server.py` | Your MCP server  |
 | `mcp_client.py` | Calling an MCP tool from your agent. Given to you |
-| `scenarios.py` | What your test runs. **You fill this in** |
+| `scenarios.py` | What the test runs. |
 | `run_eval.py` | Runs the scenarios repeatedly and writes the run log |
-| `criteria.md` | Your five acceptance criteria. **You fill this in** |
+| `criteria.md` | The five acceptance criteria.  |
 | `data/` | 40 listings and the wardrobe schema |
 | `utils/data_loader.py` | Loading the data. Use this rather than reading the files yourself |
-| `results/` | Run logs. **Commit these** — they're your evidence |
+| `results/` | Run logs. — they're evidence |
 
 ---
 
@@ -193,7 +171,7 @@ If your fit cards come out **word-for-word identical** every time, it is one of:
 
 ## About rate limits
 
-**This is the heaviest pair in the course for call volume.** Two of your three
+**This is the heaviest pair in the course for call volume.** Two of your four
 tools call the model, so one agent run is several requests, and a few runs back
 to back while debugging can cross the per-minute limit.
 
@@ -236,13 +214,3 @@ Still stuck after one honest attempt? Post in the help channel with the full
 error, what you ran, and what you expected.
 
 ---
-
-## A note on committing
-
-At least four new commits in unit 3, at least four more in unit 4. Your commit
-history is what shows your criteria existed before your results did.
-
-**Do not delete and recreate this repository.** You submit the same URL both
-units.
-
-`results/` is deliberately **not** in `.gitignore`.

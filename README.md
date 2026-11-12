@@ -52,7 +52,23 @@ The Shape I am picking to extend this system is Shape C. I will be adding a four
 I will not be touching or editing how the search_listings(),suggest_outfit(), or create_fit_card(). I also thought about a compare_prices() function before, but decided among the compare_listings, because using more factors rather than just price is more realistic when a person is out shopping.
 
 
+## Instrumentation
+10 run log entries, with prompt tokens and output tokens also logged to help towards measuring the cost of each run.
+**NOTE**: All the entries successfully ran, none of the 10 runs failed.
 
+{"timestamp": "2026-11-12T04:36:28+00:00", "query": "vintage graphic tee under $30", "output": "Scored this cute braided brown leather belt on thredUp for only $12 and it is so good for adding texture to outfits. It comes in One Size (adjustable) so it works great for cinching high-waisted jeans or wide-leg trousers. I am obsessed with how it gives off that cool 90s-meets-Western vibe whether I am running errands or grabbing coffee.", "seconds": 1.38, "prompt_tokens": 432, "output_tokens": 82, "total_tokens": 514}
+{"timestamp": "2026-11-12T04:36:30+00:00", "query": "vintage graphic tee under $30", "output": "Scored this braided brown leather belt for only $12 on thredUp and I am obsessed with the vintage Western vibe. It comes in One Size (adjustable) and adds so much texture whether I am styling it with baggy 90s denim or wide-leg khakis. It is such an easy way to elevate a simple tank top and sneakers look without trying too hard.", "seconds": 2.05, "prompt_tokens": 432, "output_tokens": 78, "total_tokens": 510}
+{"timestamp": "2026-11-12T04:36:31+00:00", "query": "vintage graphic tee under $30", "output": "Scored this braided brown leather belt for just $12 on thredUp and I am obsessed with the vintage Western vibe. It comes in One Size (adjustable) and adds so much texture whether I am wearing it with baggy 90s denim or sharp khaki trousers. I love how it instantly pulls together a relaxed weekend look or a cool coffee date outfit.", "seconds": 1.35, "prompt_tokens": 432, "output_tokens": 74, "total_tokens": 506}
+{"timestamp": "2026-11-12T04:36:32+00:00", "query": "vintage graphic tee under $30", "output": "Found this braided brown leather belt on thredUp for only $12 and it is such a good texture upgrade from my plain belts. It comes in One Size (adjustable) and adds the coolest 90s Western touch to a simple white tank and baggy jeans. I'm also planning to style it with wide-leg khakis and combat boots for an easy coffee date look.", "seconds": 1.31, "prompt_tokens": 432, "output_tokens": 79, "total_tokens": 511}
+{"timestamp": "2026-11-12T04:36:34+00:00", "query": "vintage graphic tee under $30", "output": "Scored this amazing braided leather belt on thredUp for just $12. Since it is One Size (adjustable), it is super easy to throw over baggy jeans and a white tank for that 90s Western casual vibe. I am definitely going to be wearing this non-stop for weekend errands!", "seconds": 1.45, "prompt_tokens": 432, "output_tokens": 63, "total_tokens": 495}
+{"timestamp": "2026-11-12T04:36:35+00:00", "query": "vintage graphic tee under $30", "output": "I can't get over this braided brown leather belt I scored on thredUp for only $12. Since it's One Size (adjustable), it cinches my baggy 90s jeans and wide-leg trousers perfectly. Adding that little Western buckle gives the whole outfit such a cool, textured finish for running errands or grabbing coffee.", "seconds": 1.34, "prompt_tokens": 432, "output_tokens": 71, "total_tokens": 503}
+{"timestamp": "2026-11-12T04:37:45+00:00", "query": "vintage graphic tee under $30", "output": "Scored this vintage braided brown leather belt on thredUp for just $12 and it is so good for adding texture. It comes in One Size (adjustable) so it works with literally all my high-waisted denim and trousers. I'm obsessed with how it pulls together a 90s casual vibe or adds edge to wide-leg trousers for a record store run.", "seconds": 70.01, "prompt_tokens": 432, "output_tokens": 79, "total_tokens": 511}
+{"timestamp": "2026-11-12T04:37:47+00:00", "query": "vintage graphic tee under $30", "output": "Found this gorgeous braided brown leather belt on thredUp for just $12 and it's in the One Size (adjustable) fit. The Western buckle adds the best texture whether I'm tossing it on with baggy dark-wash jeans for a relaxed 90s vibe or styling it with khaki trousers and combat boots. It is such an easy piece to dress up or down.", "seconds": 1.53, "prompt_tokens": 432, "output_tokens": 79, "total_tokens": 511}
+{"timestamp": "2026-11-12T04:37:48+00:00", "query": "vintage graphic tee under $30", "output": "Scored this gorgeous braided brown leather belt on thredUp for just $12 and I am obsessed. It comes in One Size (adjustable) so it's super easy to wear low on baggy jeans or cinched over wide-leg trousers. That Western buckle adds just the right amount of texture to pull together a relaxed 90s-meets-edgy coffee date fit.", "seconds": 1.29, "prompt_tokens": 432, "output_tokens": 79, "total_tokens": 511}
+{"timestamp": "2026-11-12T04:37:49+00:00", "query": "vintage graphic tee under $30", "output": "Scored this braided brown leather belt for only $12 on thredUp and I am obsessed with the texture. It comes in One Size (adjustable) so it's super easy to throw on with baggy jeans and a white tank for that 90s-meets-Western casual look. It honestly completely changes the vibe compared to my plain belts.", "seconds": 1.26, "prompt_tokens": 432, "output_tokens": 73, "total_tokens": 505}
+
+## What it Costs
+Across the 10 logged runs, the system used 5,077 total tokens, which averages to about 507.7 tokens per a single run. I calculated each run's usage of tokens by adding its prompt tokens and output tokens. Then I added the totals from all 10 runs and divided by 10.
 ## Tool Inventory
 
 <!-- Four lines per tool. This is worth 2 points and it's the single most
@@ -77,6 +93,19 @@ max_price (float)
 A list of listing dictionaries, each with the fields: "id,title,description,category,style_tags,size,condition,price,colors,brand,platform"
 - **When it has nothing:**
 It will return an empty list, since nothing matched.
+
+### `compare_listings`
+- **What it does:**
+Takes the list of listing dictionaries returned by `search_listings()` and scores each listing using its price and condition.
+
+- **Inputs:**
+listings (list[dict])
+
+- **Returns:**
+The listing dictionary with the highest calculated score,
+
+- **When it has nothing:**
+It will return 'None'.
 
 ### `suggest_outfit`
 
