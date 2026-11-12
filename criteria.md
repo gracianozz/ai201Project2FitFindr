@@ -8,99 +8,56 @@ a person could plainly observe. *"The agent handles errors"* is an opinion.
 *"When search returns nothing, the agent stops before calling the second tool,
 in 5 of 5 tries"* is a criterion.
 
-Under each one, write a sentence or two on **why that target** and not a
-stricter one. A reason that says something about your tools, your loop, or the
-data earns credit; *"80% seemed reasonable"* does not.
-
-> Missing your own targets next unit costs you nothing. Setting a target so
-> easy you can't miss it does.
-
-**Two are written for you. You write three.**
-
 ---
 
-## 1. A matching query completes all three tools
+## 1. A matching query completes all FOUR tools
 
-Given a query that matches at least one listing, the agent completes all three
-tool calls and returns a fit card — in at least 4 of 5 tries.
+Given a query that matches at least one listing, the agent completes all FOUR tool calls and returns a fit card — in at least 2 of 3 runs.
 
 **Why this target:**
-<!-- Why 4 of 5 and not 5 of 5? Something about your search, probably —
-     "my search is a plain keyword match and some phrasings will miss" is a
-     real answer. -->
+
 - A search can be vague or plain, which can mean that some words wont be detected.
 
 ---
 
-## 2. An impossible query stops before the second tool
+## 2. A bad query stops before the compare_listings() tool.
 
-Given a query that matches no listings, the agent stops before calling
-`suggest_outfit` and returns a message naming what to change — 5 of 5 tries.
+Given a query that matches no listings, the agent returns an error message,
+does not call `compare_listings()`, `suggest_outfit()`, or `create_fit_card()`,
+and stops safely in 3 of 3 runs.
 
 **Why this target:**
-<!-- Why is 5 of 5 reasonable here when criterion 1 isn't? What's different
-     about this path? -->
-- The later tools, like suggest_outfit and create_fit_card, wont be able to function and do anything meaningful without an item. This makes it necessary to be all 5 of 5 tries.
+- The 3 tools do not function without no listings, so the system should stop there every time, instead of making up or generating information.
 
 ---
 
-## 3. Something about state
+## 3. compare_listings() calculates the combined score accurately
 
-<!-- YOU WRITE THIS ONE.
-
-
-     How would you know that the item your search found is the same item the
-     next tool received? Name something countable or observable.
-
-     This is the criterion people find hardest, because state failure doesn't
-     look like state failure — it looks like a tool problem. Something that
-     compares session["selected_item"] against what actually reached
-     suggest_outfit is the shape you're after. -->
-
-The selected_item ID reaches both suggest_outfit and create_fit_card unchanged — for 5 of 5 tries
+After scoring each listing returned from search_listings(), compare_listings() chooses the listing with the highest score, in 3 of 3 runs.
 
 **Why this target:**
-- This ensures that the match that was picked is the one that was described. Using the ID makes sure it stays consistent throughout the whole run for each run. This path is determinstic.
+- This ensures the new extension is working as described, and it chooses the top choice with the highest score each time, instead of just the first option in the list as the original system did.
 
 
 
 ---
 
-## 4. Something about the fit card
-
-<!-- YOU WRITE THIS ONE.
-
-     The fit card calls a model, so the same input can produce different words
-     each time. That's not a bug — it's the nature of the tool. So what would
-     make it acceptable?
-
-     Think about what you'd actually be unhappy to see. A caption that never
-     mentions the price? Two different items producing the same opening
-     sentence? A card longer than a caption anyone would post? Any of those can
-     be turned into a number. -->
-
-For 5 different items, each fit card mentions the item's price,size, and platform, and is between 2-4 sentences — In at least 4 of 5 tries.
+## 4. Selected Item has relevance
+For 3 runs with clear item types or styles, the user can evaluate whether the listing after compare_listings() is a reasonable match for the original request. The criterion passes when the selected item is relevant to their query, in 3 of 3 runs.
 
 **Why this target:**
-- Wording can make it so some fit cards may not pass. When checking for a number like '$38', the model can write it in words instead, and even though it is right, it can still fail.
+- A listing that has the highest price and condition score needs can still have the possibility of being an irrelevant or mismatch to what the user requested. This helps verify that the user is getting the best realistic match instead of just choosing the cheapest high-condition item.
 
 
 ---
 
-## 5. Your choice
+## 5. The selected listing is passed consistently
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. Speed, the empty
-     wardrobe path, what happens when the model can't be reached, whether the
-     search respects a price ceiling — anything, as long as it names a number
-     or an observable outcome. -->
-
-For 5 queries with a price ceiling, every listing in search_results has a price less than or equal to the ceiling  — In 5 of 5 tries.
+For every successful query, the listing that is selected in compare_listings() has the same ID as the item passed to the later tools suggest_outfit() and create_fit_card(), in 3 of 3 runs.
 
 
 **Why this target:**
-- This target ensures correctness. The search respects the price ceiling the user has set it to, so no listing above it ever reaches the later tools (search_outfit & create_fit_card)
+- This ensures that the new tool is properly being worked with the other tools, and ensures smooth flow when a query is passed through.
 
 
 ---
