@@ -154,9 +154,7 @@ gunicorn serve:app
 | `gunicorn serve:app`, exactly | Not `-k gevent`, not `-k eventlet`, not wrapped for uvicorn. `mcp_client.call_tool` uses `asyncio.run()`, which won't start inside a running event loop, so an async worker breaks **every** MCP call — and only once you've deployed it |
 | The first request is slow | The free tier puts your app to sleep after about fifteen minutes of nothing. The next request wakes it up and waits for it — around a minute. Not a bug, and worth knowing before you demo it |
 
-`serve.py` ships with **no logging and no timing in it**, on purpose. You add
-that yourself in the follow-along, before you deploy — instrumenting first is
-the point of the session.
+
 
 ---
 
@@ -166,7 +164,7 @@ the point of the session.
 |---|---|
 | `config.py` | Every setting worth changing — **TEMPERATURE and the cache are at the top** |
 | `tools.py` | Where the 4 tools live |
-| `agent.py` | The planning loop and the session. **Stub — you build this** |
+| `agent.py` | The planning loop and the session. |
 | `generate.py` | The only thing that calls out to a service. Handles pacing and quota |
 | `trace.py` | The trace helper, and the loop's stop condition |
 | `app.py` | The command line |
@@ -222,7 +220,6 @@ is the most common architectural failure in production agents.
 
 | What you see | What it means |
 |---|---|
-| `The planning loop isn't built yet` | Correct, at the start. That's the TODO in `agent.py` |
 | `No GEMINI_API_KEY found` | No `.env`, or the key wasn't pasted in. On Windows check it didn't save as `.env.txt` |
 | A message saying the model couldn't be reached | Usually a bad key. This is also **exactly what unit 4 Milestone 2 asks you to trigger on purpose** |
 | `[rate limit] ... Waiting 34s` | Working as intended. Leave it |

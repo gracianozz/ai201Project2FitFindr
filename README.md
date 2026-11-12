@@ -69,17 +69,7 @@ I will not be touching or editing how the search_listings(),suggest_outfit(), or
 
 ## What it Costs
 Across the 10 logged runs, the system used 5,077 total tokens, which averages to about 507.7 tokens per a single run. I calculated each run's usage of tokens by adding its prompt tokens and output tokens. Then I added the totals from all 10 runs and divided by 10.
-## Tool Inventory
 
-<!-- Four lines per tool. This is worth 2 points and it's the single most
-     common place students lose them.
-
-     "Returns a list" earns NOTHING. The description has to say what is IN
-     the list.
-
-     The empty case isn't optional either — it's the thing your loop branches
-     on, and if you don't decide it here you'll discover it as a crash in
-     Milestone 5. -->
 
 ### `search_listings`
 
@@ -159,7 +149,7 @@ The query is parsed by regex in agent::parse_query.
 1. parse_query parses description,size, and max_price from user input
 2. _search calls search_listings with the parsed topics and uses that for search_results
 3. If the list is empty in search_listings, it runs the _nothing_found_message function and stops the session.
-4. Otherwise, selected_item is chosen from the first result of the returned list
+4. Otherwise, selected_item is determined based on the calculated score of relevance, price, and condition in compare_lisitngs
 5. suggest_outfit then reads selected_item and 'wardrobe', which then fills 'outfit_suggestion'
 6. create_fit_card reads outfit_suggestion(from suggest_outfit) and selected_item, which makes fit_card.
 
@@ -276,363 +266,80 @@ I rewrote the criterion to make it so at least 4 of 5 tries to better help with 
 
 
 
-<!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
+<!-- ═══════════════════════  THE TEST - CAPSTONE ═══════════════════════
 
-     Don't fill these in during unit 3.
+    
      ═══════════════════════════════════════════════════════════════════ -->
 
 ---
 
-## Run Log — Before
+## Run Log — Before, With the new extension 
 
-<!-- Five criteria, five tries each, in this exact format.
+| Criterion | Target | Try 1 | Try 2 | Try 3 | Verdict |
+|---|---:|---|---|---|---|
+| 1. Matching query completes all four tools | 2 of 3 | PASS | PASS | PASS | MET (3/3) |
+| 2. Bad query stops before compare_listings() | 3 of 3 | PASS | PASS | PASS | MET (3/3) |
+| 3. compare_listings() calculates the combined score accurately | 3 of 3 | PASS | PASS | PASS | MET(3/3)|
+| 4. Selected item has relevance | 3 of 3 | FAIL | FAIL | FAIL | MISSED (0/3) |
+| 5. Selected listing is passed consistently | 3 of 3 | PASS | PASS | PASS | MET(3/3) |
 
-     Five, because your criteria are written out of five. Mark each try PASS
-     or FAIL, count the passes, and read that count against your target — a
-     row targeting 4 of 5 with three PASS cells is MISSED (3/5).
-
-     `python run_eval.py --label before` runs everything and writes the table
-     into results/. Paste it here and fill in the verdicts. -->
-
-| Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
-|---|---|---|---|---|---|---|---|
-| 1. matching query completes | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
-| 2. impossible query stops early | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
-| 3. Consistent selected item ID | 5 of 5 | PASS | PASS | PASS | FAIL | FAIL | MISSED (3/5) |
-| 4. Proper fit card description with price, size, and platform | 4 of 5 | PASS | FAIL | FAIL | PASS | FAIL | MISSED (2/5) |
-| 5. Proper price ceiling | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
 **Real output from one try**, pasted as text, naming the file and function
 that produced it:
 
-```
-CRITERION 1 TRY
-### matching query completes
-
-- Query: `vintage graphic tee under $30`
-- Wardrobe: example
-
-**Try 1**
-
-- stopped early: no
-- selected_item: Y2K Baby Tee — Butterfly Print ($18.0, depop)
-- search_results: 10
-
-Outfit suggestion:
+CRITERION 1:
+Produced by 'serve.py::ask()' -> 'log_run()'
+```json
+{"timestamp": "2026-11-12T20:25:21+00:00", "query": "Khaki cargo pants under $40", "output": "Found these amazing olive straight leg trousers on Poshmark and I am obsessed with the fit. They are a size W30 and only cost $29, which is such a steal for how versatile they are. I love styling them with a tucked-in white tank and chunky sneakers for an easy weekend coffee run.", "seconds": 6.01, "prompt_tokens": 626, "output_tokens": 185, "total_tokens": 811}
 
 ```
-Outfit 1: Pair the butterfly baby tee with your dark wash baggy straight-leg jeans and the brown leather belt to balance the fitted crop top. Throw on your black cropped zip hoodie over your shoulders and finish the look with chunky white sneakers and your black crossbody bag. This gives you an easy, balanced 90s-meets-Y2K silhouette that is perfect for running weekend errands, hanging out at a coffee shop, or casual daytime dates.
 
-Outfit 2: Tuck the baby tee into your wide-leg khaki trousers and layer your vintage black denim jacket on top to add some edge. Lace up your black combat boots and wear your black crossbody bag for a casual vibe that plays with contrasting proportions. This look is great for casual Fridays, heading to a daytime concert, or meeting friends for lunch.
+CRITERION 2:
+Produced by 'serve.py::ask()' -> 'log_run()'
+```json
+{"timestamp": "2026-11-12T20:25:52+00:00", "query": "How to make a cheese pizza", "output": "Nothing in the listings matched description 'How to make a cheese pizza'.\nThings to change: try broader words — 'jacket' finds more than 'cropped corduroy jacket'.", "seconds": 0.49, "prompt_tokens": 0, "output_tokens": 0, "total_tokens": 0}
 ```
 
-Fit card:
+CRITERION 3: 
+Produced by 'test_compare_listings.py', json produced by 'serve.py::ask() -> 'log_run()'
 
-```
-Just scored this adorable Y2K baby tee with the cutest butterfly graphic on depop and I am obsessed. It is a size S/M and fits like a dream for only $18. I love styling it with baggy jeans and chunky sneakers for the ultimate casual weekend coffee run vibe.
-```
+Criterion 3: PASS — 3/3, 
+```json
 
-Trace:
-
-```
-[1] parse_query
-      in:  vintage graphic tee under $30
-      out: dict with keys: description, size, max_price
-[2] search_listings (via MCP)
-      in:  dict with keys: description, size, max_price
-      out: 10 items: Y2K Baby Tee — Butterfly Print, Graphic Tee — 2003 Tour Bootleg Style, Vintage Band Tee — Faded Grey … +7 more
-      →    10 match(es)
-[3] select_item
-      out: Y2K Baby Tee — Butterfly Print ($18.0, depop)
-[4] suggest_outfit
-      in:  Y2K Baby Tee — Butterfly Print ($18.0, depop)
-      out: Outfit 1: Pair the butterfly baby tee with your dark wash baggy straight-leg jeans and the brown leather belt …
-      →    10 wardrobe item(s)
-[5] create_fit_card
-      in:  Y2K Baby Tee — Butterfly Print ($18.0, depop)
-      out: Just scored this adorable Y2K baby tee with the cutest butterfly graphic on depop and I am obsessed. It is a s…
+{"timestamp": "2026-11-12T20:26:16+00:00", "query": "Oversized vintage tee", "output": "Found this absolute dream of a butterfly baby tee on depop and I am obsessed. It’s an S/M and only $18, which is a steal for how much early 2000s energy it brings. I'm picturing it styled with baggy dark-wash jeans and chunky sneakers for the ultimate nostalgic weekend fit.", "seconds": 1.3, "prompt_tokens": 392, "output_tokens": 71, "total_tokens": 463}
 ```
 
-
-
-CRITERION 2 TRY
-### impossible query stops early
-
-- Query: `designer ballgown size XXS under $5`
-- Wardrobe: example
-
-**Try 1**
-
-- stopped early: yes — Nothing in the listings matched description 'designer ballgown', size XXS, under $5.
-Things to change: try broader words — 'jacket' finds more than 'cropped corduroy jacket'; drop the size, or try a neighbouring one; raise the price ceiling above $5.
-- selected_item: (none)
-- search_results: 0
-
-Trace:
-
+CRITERION 4:
+Produced by 'serve.py::ask()' -> 'log_run()'
+```json
+{"timestamp": "2026-11-12T20:26:57+00:00", "query": "dark wash baggy pants", "output": "I am so obsessed with this vintage Wrangler denim jacket I just picked up on Poshmark. It has the best structured shoulders and comes in a size S for $42. I am definitely going to layer it over my black hoodie with baggy jeans for running weekend errands.", "seconds": 5.0, "prompt_tokens": 695, "output_tokens": 250, "total_tokens": 945}
 ```
-[1] parse_query
-      in:  designer ballgown size XXS under $5
-      out: dict with keys: description, size, max_price
-[2] search_listings (via MCP)
-      in:  dict with keys: description, size, max_price
-      out: [] (empty)
-      →    0 match(es)
-[3] branch
-      →    search returned []: stopping before suggest_outfit
+CRITERION 5:
+Produced by 'serve.py::ask()' -> 'log_run()'
+```json
+{"timestamp": "2026-11-12T20:27:27+00:00", "query": "platform sneakers size 8", "output": "Scored this reversible brown plaid bucket hat on thredUp for just $14 and it is seriously the easiest way to channel some nineties streetwear energy. Since it is One Size, I can just throw it on with a white ribbed tank and baggy dark wash jeans for the ultimate casual coffee run vibe. Can't wait to flip it to the solid tan side and wear it with wide-leg khakis and combat boots for digging through crates at the record store.", "seconds": 6.14, "prompt_tokens": 661, "output_tokens": 240, "total_tokens": 901}
 ```
-
-
-
-CRITERION 3 TRY
-###  Consistent selected item ID
-
-- Query: `leather bomber jacket under $100`
-- Wardrobe: example
-
-**Try 1**
-
-- stopped early: no
-- selected_item: 90s Leather Bomber — Black ($75.0, depop)
-- search_results: 7
-
-Outfit suggestion:
-
-```
-Buy it. This is a 90s staple that will instantly anchor your wardrobe, and the natural creasing gives it an authentic lived-in look that brand-new leather lacks. 
-
-Outfit 1: Layer the oversized grey crewneck sweatshirt over your white ribbed tank top, pair them with your baggy dark-wash straight-leg jeans, and step into the chunky white sneakers. Throw the leather bomber over the grey crewneck, letting the sweatshirt hem peek out the bottom for that effortless, slouchy 90s skater vibe. This outfit is ideal for casual weekend errands, hanging out at a record store, or grabbing coffee.
-
-Outfit 2: Tuck your white ribbed tank top into the wide-leg khaki trousers, cinch your waist with the brown leather belt, and lace up your black combat boots. Top it off with the black leather bomber for a sharp mix of rugged outerwear and tailored, utilitarian bottoms. This look works great for a casual Friday at work, gallery hopping, or a casual dinner date.
-```
-
-Fit card:
-
-```
-Scored this vintage 90s leather bomber on depop for $75 and it has the absolute best worn-in look. It comes in size M and has that perfect boxy skater fit when I layer it over a grey crewneck and baggy jeans. Honestly the easiest way to add some instant grunge to any outfit.
-```
-
-Trace:
-
-```
-[1] parse_query
-      in:  leather bomber jacket under $100
-      out: dict with keys: description, size, max_price
-[2] search_listings (via MCP)
-      in:  dict with keys: description, size, max_price
-      out: 7 items: 90s Leather Bomber — Black, 90s Track Jacket — Navy/White Stripe, Denim Jacket — Light Wash, Cropped … +4 more
-      →    7 match(es)
-[3] select_item
-      out: 90s Leather Bomber — Black ($75.0, depop)
-[4] suggest_outfit
-      in:  90s Leather Bomber — Black ($75.0, depop)
-      out: Buy it. This is a 90s staple that will instantly anchor your wardrobe, and the natural creasing gives it an au…
-      →    10 wardrobe item(s)
-[5] create_fit_card
-      in:  90s Leather Bomber — Black ($75.0, depop)
-      out: Scored this vintage 90s leather bomber on depop for $75 and it has the absolute best worn-in look. It comes in…
-```
-
-
-
-
-CRITERION 4
-### Proper fit card description with price,size, and platform
-
-- Query: `low-rise cargo pants`
-- Wardrobe: example
-
-**Try 1**
-
-- stopped early: no
-- selected_item: Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
-- search_results: 3
-
-Outfit suggestion:
-
-```
-Outfit 1: Pair the khaki cargo pants with your white ribbed tank top and the black cropped zip hoodie layered over it, keeping the hoodie unzipped to show off the low-rise waist. Add the chunky white sneakers and the black crossbody bag to complete an authentic early-2000s streetwear look that works great for casual weekend errands or meeting friends for coffee.
-
-Outfit 2: Lean into the oversized Y2K skater silhouette by wearing the cargos with your oversized grey crewneck sweatshirt dropping low over the waistband, and lace up your black combat boots over the distressed hems. Throw on the vintage black denim jacket and sling the black crossbody bag across your chest for an edgy, comfortable outfit tailored for going to a casual outdoor concert or a casual Friday hangout.
-```
-
-Fit card:
-
-```
-Scored these ultimate Y2K cargos over on Poshmark for just $27 and I am so obsessed with the early-2000s streetwear vibe. They are a size W29 with the coolest distressed hems and way too many pockets. I love throwing them on with a cropped zip hoodie and chunky sneakers for the easiest weekend coffee run outfit.
-```
-
-Trace:
-
-```
-[1] parse_query
-      in:  low-rise cargo pants
-      out: dict with keys: description, size, max_price
-[2] search_listings (via MCP)
-      in:  dict with keys: description, size, max_price
-      out: 3 items: Low-Rise Cargo Pants — Khaki, Corduroy Wide-Leg Pants — Rust, Low-Top Canvas Sneakers — Off-White
-      →    3 match(es)
-[3] select_item
-      out: Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
-[4] suggest_outfit
-      in:  Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
-      out: Outfit 1: Pair the khaki cargo pants with your white ribbed tank top and the black cropped zip hoodie layered …
-      →    10 wardrobe item(s)
-[5] create_fit_card
-      in:  Low-Rise Cargo Pants — Khaki ($27.0, poshmark)
-      out: Scored these ultimate Y2K cargos over on Poshmark for just $27 and I am so obsessed with the early-2000s stree…
-```
-
-
-
-CRITERION 5 TRY
-### Proper price ceiling
-
-- Query: `Sneakers under $25`
-- Wardrobe: example
-
-**Try 1**
-
-- stopped early: yes — The model couldn't be reached, so the outfit and caption steps didn't run. The search worked — 1 listing(s) were found. Check GEMINI_API_KEY in your .env, then run the same query again.
-What the service said: Couldn't reach the model: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-- selected_item: Low-Top Canvas Sneakers — Off-White ($20.0, poshmark)
-- search_results: 1
-
-Trace:
-
-```
-[1] parse_query
-      in:  Sneakers under $25
-      out: dict with keys: description, size, max_price
-[2] search_listings (via MCP)
-      in:  dict with keys: description, size, max_price
-      out: 1 items: Low-Top Canvas Sneakers — Off-White
-      →    1 match(es)
-[3] select_item
-      out: Low-Top Canvas Sneakers — Off-White ($20.0, poshmark)
-[4] model unavailable
-      →    stopping, search results kept
-```
----
-
-
 
 
 ## Verdicts and Diagnoses
 
-<!-- MET or MISSED per criterion against LAST UNIT's target, plus a sentence on
-     how you decided.
-
-     Then, for every miss: which of the four places it happened — a tool, the
-     loop's branch, the session, or the model's output — AND the mechanism.
-
-     Not a diagnosis:  "The fit card was bad."
-     A diagnosis:      "The fit card criterion missed on 2 of 5 items. Both had
-                        an empty brand field. My prompt puts the brand in the
-                        first sentence, so the card opened with a blank and read
-                        like a fragment. The tool worked; the prompt assumed a
-                        field that isn't always there."
-
-     Look for a pattern. Three misses on the same tool is one problem, not
-     three. -->
-
-| # | Criterion | Target | Verdict | How I decided |
-|---|---|---|---|---|
-| 1 | matching query completes | 4 of 5 | MET | A try would be considered as passed if the trace reached step 5, the create_fit_card tool, and the fit card in the session was not empty. All 5 runs had reached all steps and had a fit card.|
-| 2 | impossible query stops early | 5 of 5 | MET | A try that would end in the 3rd trace, showing that no outfit appeared, and suggesting what to properly search for would be considered a pass. Each run stopped at the 3rd trace and did not suggest anything since nothign was returned for the outfit. |
-| 3 | Consistent selected item ID  | 5 of 5 | MISSED | A try passed if the item on the select_item matched the input lines of both suggest_outfit and create_fit_card. Tries 4 and 5 never ran create_fit_card, so they were a miss. |
-| 4 | Proper fit card description with price, size, and platform  | 4 of 5 | MISSED | A try passed if the results had a price,size, and platform. Tries 2,3, and 5 produced no card because the model could not run.   |
-| 5 | Proper price ceiling  | 5 of 5 | MET | A try passed if every listing in the search had a price at or below the ceiling price. Each run met the criteria. |
+| Criterion | Target | Verdict | How I decided | 
+|---|---|---|---|
+| 1.Matching query completes all four tools | 2 of 3 | MET (3/3) | Each matching query returned a fit card. The trace showed the run reached search_listings(), compare_listings(), suggest_outfit(), and create_fit_card(). | 
+| 2. Bad query stops before compare_listings() | 3 of 3 | MET (3/3) | Each impossible query returned the no-results message, with no downstream tools called. | 
+| 3. compare_listings() calculates the combined score accurately | 3 of 3 | MET(3/3)| test_compare_listings.py used three controlled cases. In each case, the expected highest-scoring listing matched the listing returned by compare_listings(). | 
+| 4. Selected item has relevance | 3 of 3 | MISSED (0/3) | The three selected items were not good matches: an oversized tee query returned a baby tee, dark wash baggy pants returned a denim jacket, and platform sneakers returned a bucket hat.  | 
+| 5. Selected listing is passed consistently | 3 of 3 | MET(3/3) | In each traced run, the listing ID returned by compare_listings() matched the IDs passed to suggest_outfit() and create_fit_card(). | 
 
 
 **Diagnoses**
-Criterion 3 (Consistent selected item ID). Missed 2 of 5
-- The step: Model's Output
-- The Mechanism: in tries 4 and 5, the model call inside create_fit_card returned 503 UNAVAILABLE. The generate.py model gave up instead of retrying, which caused both tries to fail.
+Criterion 4 (Selected item has relevance) was a MISS.
+The step: 'tools.py::compare_listings()', after 'tools::search_listings()' returned its matches.
 
-
-Criterion 4(Proper fit card description with price,size, and platfomr). Passed 2 of 5 tries.
-- The step: Model's Output
-- The Mechanism: In tried 2,3, and 5 the model ALSO returned 503 Unavailable. The generate.py model gave up instead of trying for this case also, so the run ended with fit_card set to None. The agent did not survive the temporary model outage.
-
-Both of these Criteria missed because of ONE reason, which was the Model's Output. This means that the pattern for both of these misses is the agent giving up instead of trying again.
+Mechanism: 'search_listings()' returns listings that overlap with keywords, and 'compare_listings()' scores the returned listings only by the condition and the lowest price to determine which one to choose. It does not consider how relevant each listing is to the original query. This makes it so an inxepensive or higher-condition listing can win even if it is the wrong type of item as opposed to the query.
 ---
 
-## Loop Trace
 
-
-<!-- One full run, printed step by step, with the MCP call visible in it.
-
-     `python app.py ask '...' --trace` once you've added the trace.step()
-     calls in Milestone 2.
-
-     Worth pasting BOTH the happy path and the empty-search path. The empty
-     one should be visibly shorter, because it stops. If your two traces are
-     the same length, your branch isn't working — and this is the fastest way
-     anyone will ever find that out. -->
-
-**Happy path**
-
-```
-python app.py ask 'Vintage crewneck for under $25' --trace
-[1] parse_query
-      in:  Vintage crewneck for under $25
-      out: dict with keys: description, size, max_price
-[2] search_listings (via MCP)
-      in:  dict with keys: description, size, max_price
-      out: 10 items: Oversized Crewneck Sweatshirt — Vintage Navy, Oversized College Crewneck — Faded Red, Y2K Baby Tee — Butterfly Print … +7 more
-      →    10 match(es)
-[3] select_item
-      out: Oversized Crewneck Sweatshirt — Vintage Navy ($20.0, thredUp)
-[4] suggest_outfit
-      in:  Oversized Crewneck Sweatshirt — Vintage Navy ($20.0, thredUp)
-      out: Buy it. A genuine vintage navy crewneck is a foundational piece that adds great texture, and since your other …
-      →    10 wardrobe item(s)
-[5] create_fit_card
-      in:  Oversized Crewneck Sweatshirt — Vintage Navy ($20.0, thredUp)
-      out: Scored this vintage navy crewneck on thredUp for just $20 and it's already my new favorite basic. It came in s…
-
-  Found:    Oversized Crewneck Sweatshirt — Vintage Navy — $20.0 on thredUp
-
-  Outfit:   Buy it. A genuine vintage navy crewneck is a foundational piece that adds great texture, and since your other grey sweatshirt is extra long, this will give you a different silhouette. 
-
-Outfit 1:
-Pair the navy sweatshirt with your wide-leg khaki trousers, cinched with the brown leather belt, and finish with chunky white sneakers. Layer the white ribbed tank underneath so just the hem and collar peek out for subtle contrast. This is effortless and put-together, perfect for casual coffee runs, running errands, or a relaxed day of working from a cafe.
-
-Outfit 2:
-Tuck the front of the navy sweatshirt loosely into your dark wash baggy straight-leg jeans, add the black crossbody bag, and lace up your black combat boots. Throw your vintage black denim jacket on top for extra warmth and texture. It is a sharp, vintage-leaning casual look that works well for weekend hangouts, casual dinners, or going to a concert.
-
-  Fit card: Scored this vintage navy crewneck on thredUp for just $20 and it's already my new favorite basic. It came in size XL (fits oversized) and has that real, perfectly faded look you can't fake. I'm planning to layer it over a white tank with khaki trousers for coffee runs, or pair it with baggy jeans and combat boots for weekend concerts.
-```
-
-**Empty search**
-
-```
-python app.py ask '...' --trace
-[1] parse_query
-      in:  ...
-      out: dict with keys: description, size, max_price
-[2] search_listings (via MCP)
-      in:  dict with keys: description, size, max_price
-      out: [] (empty)
-      →    0 match(es)
-[3] branch
-      →    search returned []: stopping before suggest_outfit
-
-  Nothing in the listings matched description '...'.
-Things to change: try broader words — 'jacket' finds more than 'cropped corduroy jacket'.
-```
-
-**On the MCP move:** <!-- what changed in your code, and whether anything
-behaved differently afterwards. If the rewire didn't work, say exactly where it
-broke — the error text and the last thing that worked. That earns the point in
-full. -->
-
-I registered `search_listings` in `mcp_server.py` with `@mcp.tool()`, typed as `description: str`, `size: str | None`, `max_price: float | None`, and it hands off to the real implementation in `tools.py`. In `agent.py::run_agent` the direct call `search_listings(...)` became `call_tool("search_listings", {...})` from `mcp_client.py`, and the trace step is labelled `search_listings (via MCP)` so the seam is visible. `python mcp_client.py` lists the tool with the right types. Nothing behaved differently afterwards: the same queries returned the same lists of dicts, the first result was the same item every time, and the branch rule still fires on an empty list. The one gap is that the server reports no description for the tool, because my docstring sits after the function body instead of inside it, so FastMCP never sees it. That is in What's Still Broken.
-
-
-
----
 
 ## The Improvement
 
