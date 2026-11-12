@@ -127,8 +127,9 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         If search_listings returns an empty list, put a message in
         session["error"] naming what the user could change, and return the
         session without calling suggest_outfit. Otherwise, the listings
-        are compared and calculated on price and condition in compare_listings()
-        ,and the best one is put in session["selected_item"], and continue.
+        are compared using relevance, price, and condition in
+        compare_listings(), and the best one is put in session["selected_item"],
+        and continue.
     """
     session = new_session(query, wardrobe)
     steps = 0
@@ -172,8 +173,22 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
         steps += 1
         trace.check_iterations(steps)
-        session["selected_item"] = compare_listings(results)
-        trace.step("compare_listings", inputs = results, returned = session["selected_item"])
+        session["selected_item"] = compare_listings(
+            results, parsed["description"]
+        )
+        trace.step(
+            "compare_listings",
+            inputs=results,
+            returned=session["selected_item"],
+        )
+
+        if session["selected_item"] is None:
+            session["error"] = _nothing_relevant_message(parsed)
+            trace.step(
+                "branch",
+                note="compare found no relevant listing: stopping before suggest_outfit",
+            )
+            return session
 
         steps += 1
         trace.check_iterations(steps)
@@ -234,6 +249,14 @@ def _nothing_found_message(parsed: dict) -> str:
     return (
         "Nothing in the listings matched " + ", ".join(tried) + ".\n"
         "Things to change: " + "; ".join(suggestions) + "."
+    )
+
+
+def _nothing_relevant_message(parsed: dict) -> str:
+    """Explain that search results existed but none matched the item type."""
+    return (
+        f"No listings were relevant to {parsed['description']!r}. "
+        "Try a broader item description."
     )
 
 

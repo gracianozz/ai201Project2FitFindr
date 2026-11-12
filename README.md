@@ -46,7 +46,7 @@ FitFindr takes an input request from the user, something like "vintage graphic t
 ---
 
 ## The Shape
-The Shape I am picking to extend this system is Shape C. I will be adding a fourth tool to the system, called compare_listings(). This tool will receive the list of dicitonaries that are returned by search_listings(), score each listing using the factors price and condition, and return the listing wiht the highest score. This improves the selection process because the system will no longer automatically choose the first result, it will now choose what is considered the 'best' option for the user.
+The Shape I am picking to extend this system is Shape C. I will be adding a fourth tool to the system, called compare_listings(). This tool will receive the list of dictionaries returned by search_listings() and the user's item description. It scores relevance first, then condition and price, and returns the highest-scoring relevant listing.
 
 ## Out of Scope
 I will not be touching or editing how the search_listings(),suggest_outfit(), or create_fit_card(). I also thought about a compare_prices() function before, but decided among the compare_listings, because using more factors rather than just price is more realistic when a person is out shopping.
@@ -70,6 +70,9 @@ I will not be touching or editing how the search_listings(),suggest_outfit(), or
 ## What it Costs
 Across the 10 logged runs, the system used 5,077 total tokens, which averages to about 507.7 tokens per a single run. I calculated each run's usage of tokens by adding its prompt tokens and output tokens. Then I added the totals from all 10 runs and divided by 10.
 
+If 100 people were to run this system in a day, it would cost about 507,700 tokens. 5,077*100 = 507,700.
+
+
 
 ### `search_listings`
 
@@ -86,10 +89,10 @@ It will return an empty list, since nothing matched.
 
 ### `compare_listings`
 - **What it does:**
-Takes the list of listing dictionaries returned by `search_listings()` and scores each listing using its price and condition.
+Takes the list of listing dictionaries returned by `search_listings()` and the user's item description. It scores relevance, condition, and price, rejecting listings from the wrong category.
 
 - **Inputs:**
-listings (list[dict])
+listings (list[dict]), description (str)
 
 - **Returns:**
 The listing dictionary with the highest calculated score,
@@ -266,6 +269,24 @@ I rewrote the criterion to make it so at least 4 of 5 tries to better help with 
 
 
 
+## How I used AI -CAPSTONE
+**Moment 1**
+- *What I asked for:*
+ I asked Github if my ORIGINAL options for scoring on price, condition, and SIZE were measureable.
+- *What came back:*
+Claude told me that size was already filtered out in search_listings(), which meant that search_listings was already checking price limits on the listings.
+- *What I changed:*
+That made me choose only the two categories to calculate since size was already being implemented.
+
+**Moment 1**
+
+- *What I asked for:*
+
+- *What came back:*
+
+- *What I changed:*
+
+
 <!-- ═══════════════════════  THE TEST - CAPSTONE ═══════════════════════
 
     
@@ -329,7 +350,7 @@ Produced by 'serve.py::ask()' -> 'log_run()'
 | 2. Bad query stops before compare_listings() | 3 of 3 | MET (3/3) | Each impossible query returned the no-results message, with no downstream tools called. | 
 | 3. compare_listings() calculates the combined score accurately | 3 of 3 | MET(3/3)| test_compare_listings.py used three controlled cases. In each case, the expected highest-scoring listing matched the listing returned by compare_listings(). | 
 | 4. Selected item has relevance | 3 of 3 | MISSED (0/3) | The three selected items were not good matches: an oversized tee query returned a baby tee, dark wash baggy pants returned a denim jacket, and platform sneakers returned a bucket hat.  | 
-| 5. Selected listing is passed consistently | 3 of 3 | MET(3/3) | In each traced run, the listing ID returned by compare_listings() matched the IDs passed to suggest_outfit() and create_fit_card(). | 
+| 5. Selected listing is passed consistently | 3 of 3 | MET(3/3) | In each traced run, the listing ID returned by compare_listings() matched the IDs passed to suggest_outfit() and create_fit_card(). Using the query "python app.py ask 'Khaki cargo pants under $40' --trace", helped me check the same ID was being passed | 
 
 
 **Diagnoses**
@@ -341,7 +362,7 @@ Mechanism: 'search_listings()' returns listings that overlap with keywords, and 
 
 
 
-## The Improvement
+## The Improvement, CAPSTONE
 
 <!-- What you changed, why your diagnosis pointed at it, and the after-run in
      the same table format. One change, measured properly.
@@ -349,30 +370,25 @@ Mechanism: 'search_listings()' returns listings that overlap with keywords, and 
      `python run_eval.py --label after` -->
 
 **What I changed:**
-Added 503 to the list of errors that generate.py is willing to retry.
+Instead of compare_listings() just calculating the score of each listing returned by search_listings() by price and condition, I added relevance score that will check whether keywords that belong to each category are found in the query. This way, it will higher points, making relevancy the biggest scorer.
 
 **Which failure it was meant to fix:**
-Meant to handle the 503 UNAVAILABLE that was returned on criteria 3 and 4. The model returned 503 UNAVAILABLE and generate.py gave up on the first try, rather than trying again. This change makes it retry the failed model call if there is an outage or a 'high demand' message.
+The failure was meant to fix the MISS on criterion 4 (Selected item has relevance). All 3 runs failed due to the system returning a fit card that did not match the user's query.
 
 ### Run Log — After
 
-| Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
-|---|---|---|---|---|---|---|---|
-| 1.  | matching query completes | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
-| 2.  | impossible query stops early | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
-| 3.  | Consistent selected item ID | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
-| 4.  | Proper fit card description with price, size, and platform | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
-| 5.  | Proper price ceiling | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
+| Criterion | Target | Try 1 | Try 2 | Try 3 | Verdict |
+|---|---:|---|---|---|---|
+| 1. Matching query completes all four tools | 2 of 3 | PASS | PASS | PASS | MET (3/3) |
+| 2. Bad query stops before compare_listings() | 3 of 3 | PASS | PASS | PASS | MET (3/3) |
+| 3. compare_listings() calculates the combined score accurately | 3 of 3 | PASS | PASS | PASS | MET(3/3)|
+| 4. Selected item has relevance | 3 of 3 | PASS | PASS | PASS | MET(3/3) |
+| 5. Selected listing is passed consistently | 3 of 3 | PASS | PASS | PASS | MET(3/3) |
+
 
 **Did it help, and how do I know:**
 
-<!-- If it made things worse, say that. Honestly reported, that earns full
-     credit and is more interesting than one that worked. -->
-The change did help. Criterion 3 went from 3/5 to 5/5, and criterion 4 went from 2/5 to 5/5 with the same scenarios. I also did a second after run to see if it scored the same.
-
-
-After the improvement, I decided to rerun 8 new scenarios covering the criteria I added. The results are found in results (results/run_2026-10-08_1309_diagnostic.md). The 503 UNAVAILABLE error came back in two tries of the leather bomber scenario. The outage lasted longer than 5 attempts, which made the model return the 503. The generate.py raised a RunTimeError instead of a ModelUnavailable, so the run crashed rather than returning the "model couldnt be reached" message.
-
+The change did help, Criterion 4 went from MISS with no runs passed, to all passing. The query used for criterion 4: 'Dark Wash Baggy Pants', now returns a similar fit card to what the query was asking for, now recommending black carpenter jeans.
 
 ---
 
@@ -381,8 +397,6 @@ After the improvement, I decided to rerun 8 new scenarios covering the criteria 
 <!-- For each criterion still missed: what you'd do, and why you stopped where
      you did. "I ran out of time" is fine if it's true. Pretending nothing is
      left is not. -->
-
-Short outages were handled better, but longer outages got worse. An outage that takes more than 5 attempts now crashes the agent instead of returning an error message. A fix would be to raise the ModelUnavailable so the existing handler catches it. I stopped because this is a second change in which I would need to do its own before and after, but due to time constraints I could not.
 
 <!-- ═════════════════════════════════════════════════════════════════════
 

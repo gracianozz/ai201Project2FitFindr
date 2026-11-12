@@ -146,26 +146,72 @@ def search_listings(
 
 # ── Tool 4: compare_listings ────────────────────────────────────────────────────
 
-def compare_listings(listings: list[dict]) -> dict | None:
+_CATEGORY_TERMS = {
+    "bottoms": {"pants", "trousers", "jeans", "shorts", "skirt"},
+    "tops": {"tee", "shirt", "top", "hoodie", "sweatshirt", "blouse"},
+    "outerwear": {"jacket", "coat", "blazer", "bomber", "cardigan", "windbreaker"},
+    "shoes": {"sneakers", "shoes", "boots", "mary", "flats"},
+    "accessories": {"belt", "hat", "bag", "scarf"},
+}
+
+
+def compare_listings(listings: list[dict], description: str) -> dict | None:
     """
-    Compare search results and return the highest-scoring listing.
+    Compare search results and return the highest-scoring relevant listing.
     Args:
         listings: Listing dictionaries returned by search_listings().
+        description: The user's item description, used for relevance scoring.
 
     Returns:
-        The highest-scoring listing dictionary, or None if listings is empty.
+        The highest-scoring listing dictionary, or None if no listing is relevant.
 
     Scoring:
+        - Relevance is weighted most heavily using the title, category,
+          style tags, description, and colors.
         - Condition: excellent = 3 points, good = 2 points, fair = 1 point.
-        - Price: 1 point for every listing tied for the lowest price.
+        - Price: 1 point for every relevant listing tied for the lowest price.
+        - Listings with no relevance or the wrong category are rejected.
     """
-    best_listing = None
-    best_score = -1
-
     if not listings:
         return None
 
-    lowest_price = min(listing["price"] for listing in listings)
+    query_words = keywords(description)
+    if not query_words:
+        return None
+
+    query_categories = {
+        category
+        for category, terms in _CATEGORY_TERMS.items()
+        if query_words & terms
+    }
+    relevant_listings = []
+    for listing in listings:
+        if query_categories and listing.get("category") not in query_categories:
+            continue
+
+        title_words = keywords(listing.get("title", ""))
+        style_words = keywords(" ".join(listing.get("style_tags", [])))
+        description_words = keywords(listing.get("description", ""))
+        color_words = keywords(" ".join(listing.get("colors", [])))
+
+        relevance = 4 * len(query_words & title_words)
+        relevance += 2 * len(query_words & style_words)
+        relevance += len(query_words & description_words)
+        relevance += len(query_words & color_words)
+        if query_categories and listing.get("category") in query_categories:
+            relevance += 8
+
+        if relevance > 0:
+            relevant_listings.append((listing, relevance))
+
+    if not relevant_listings:
+        return None
+
+    best_listing = None
+    best_score = -1
+    lowest_price = min(
+        listing["price"] for listing, _ in relevant_listings
+    )
 
     # The three types of conditions, with their points.
     condition_scores = {
@@ -174,8 +220,8 @@ def compare_listings(listings: list[dict]) -> dict | None:
         "fair": 1,
     }
 
-    for listing in listings:
-        score =0
+    for listing, relevance in relevant_listings:
+        score = relevance * 10
 
         #Award a point to listingss tied for the lowest price
         if listing["price"] == lowest_price:
